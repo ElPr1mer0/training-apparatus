@@ -1,0 +1,11 @@
+#ifndef OBJECT_MEMORY_TEST_H
+#define OBJECT_MEMORY_TEST_H
+
+
+class OBJECT_MEMORY_TEST
+{
+public:
+    OBJECT_MEMORY_TEST();
+};
+
+#endif // OBJECT_MEMORY_TEST_H

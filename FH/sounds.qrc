@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>sounds/error.mp3</file>
+        <file>sounds/error2.mp3</file>
+        <file>sounds/record.mp3</file>
+    </qresource>
+</RCC>

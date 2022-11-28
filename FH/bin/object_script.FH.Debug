@@ -1,0 +1,16 @@
+debug/db.o
+debug/main.o
+debug/object_memory_test.o
+debug/print_window_logic.o
+debug/reaction_speed_logic.o
+debug/sounds.o
+debug/training_mode.o
+debug/widget_style.o
+debug/window.o
+debug/hash.o
+debug/qrc_sounds.o
+debug/moc_db.o
+debug/moc_print_window_logic.o
+debug/moc_reaction_speed_logic.o
+debug/moc_widget_style.o
+debug/moc_window.o

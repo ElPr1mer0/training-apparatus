@@ -1,0 +1,16 @@
+release/db.o
+release/main.o
+release/object_memory_test.o
+release/print_window_logic.o
+release/reaction_speed_logic.o
+release/sounds.o
+release/training_mode.o
+release/widget_style.o
+release/window.o
+release/hash.o
+release/qrc_sounds.o
+release/moc_db.o
+release/moc_print_window_logic.o
+release/moc_reaction_speed_logic.o
+release/moc_widget_style.o
+release/moc_window.o
