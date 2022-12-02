@@ -55,12 +55,8 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_start, QPushButton *but_
     OnUpdateData(); //добавляем на форму
 
     training->ClearStatisticsContainers();
-    training->GetPrintErrors(box_training->currentText(),training->letter_errors, "letter_errors");
-    training->GetPrintErrors(box_training->currentText(),training->syllable_errors, "syllable_errors");
-    training->GetPrintErrors(box_training->currentText(),training->word_errors, "word_errors");
-    training->GetWordsSpeed(box_training->currentText());
+    training->UpdateStatisticsContainers(box_training->currentText());
 
-    training->UpdateStatisticsPerTime(box_training->currentText());
 }
 
 PRINT_WINDOW_LOGIC::~PRINT_WINDOW_LOGIC(){
@@ -163,10 +159,7 @@ void PRINT_WINDOW_LOGIC::ButCreateTrainingClicked(){
                     OnUpdateData();
 
                     training->ClearStatisticsContainers();
-                    training->GetPrintErrors(box_training->currentText(), training->letter_errors,"letter_errors");//записываем новую статистику ошибок по буквам
-                    training->GetPrintErrors(box_training->currentText(), training->syllable_errors,"syllable_errors");
-                    training->GetPrintErrors(box_training->currentText(), training->word_errors,"word_errors");
-                    training->GetWordsSpeed(box_training->currentText());
+                    training->UpdateStatisticsContainers(box_training->currentText());
                 }else{
                     lab_status->setText("Ошибка сохранения тренировки!");
                 }
@@ -337,8 +330,7 @@ void PRINT_WINDOW_LOGIC::LdFieldTextChanged(QString current_word){
 //////////////////////////ON_BUT_START_CLICKED//////////////////////////
 ////////////////////////////////////////////////////////////////////////
 // Эта функция обрабатывает нажатие на кнопку старта игры             //
-void PRINT_WINDOW_LOGIC::ButStartClicked()
-{
+void PRINT_WINDOW_LOGIC::ButStartClicked(){
     if(text_browser->toPlainText() == ""){
         text_browser->insertPlainText("Text not Loaded");
         ld_game_pole->setEnabled(false);
@@ -391,10 +383,7 @@ void PRINT_WINDOW_LOGIC::BoxTrainingCurrentIndexChanged(int){
     OnUpdateData();
 
     training->ClearStatisticsContainers();
-    training->GetPrintErrors(box_training->currentText(), training->letter_errors,"letter_errors");//записываем новую статистику ошибок по буквам
-    training->GetPrintErrors(box_training->currentText(), training->syllable_errors,"syllable_errors");
-    training->GetPrintErrors(box_training->currentText(), training->word_errors,"word_errors");
-    training->GetWordsSpeed(box_training->currentText());
+    training->UpdateStatisticsContainers(box_training->currentText());
 }
 ////////////////////////////////////////////////////////////////////////
 ////////////ON_COMBO_BOX_SELECT_BOOK_CURRENT_INDEX_CHANGED//////////////
@@ -492,8 +481,6 @@ void PRINT_WINDOW_LOGIC::IsWin(){
     ld_game_pole->clear();
 
     //обрабатываем полученные данные
-
-
     float average_current_speed = edit_text.length() - 1;
     average_current_speed = round(round((average_current_speed /(ld_current_min->text().toFloat()*60 + ld_current_sec->text().toFloat())*60)*100)/100);
     ld_current_speed->setText(QString::number(average_current_speed)); //считаем среднюю скорость за текст
@@ -504,7 +491,8 @@ void PRINT_WINDOW_LOGIC::IsWin(){
         text_browser->insertPlainText("         New record!!!           ");
     }
 
-    lab_current_mistakes->setText("Ошибки: ("+ QString::number(round(100*ld_current_mistakes->text().toFloat()*100/(edit_text.length()-1))/100) +"%)");
+    float current_mistakes =  round(100*ld_current_mistakes->text().toFloat()*100/(edit_text.length()-1))/100;
+    lab_current_mistakes->setText("Ошибки: ("+ QString::number(current_mistakes) +"%)");
     //считаем кол-во ошибок в процентах  // round*100/100 это нужно, чтобы было 2 знака после запятой
 
     training->average_speed = (average_current_speed + training->text_amount*training->average_speed) / (training->text_amount+1); // средняя скорость за все время
@@ -528,6 +516,7 @@ void PRINT_WINDOW_LOGIC::IsWin(){
     OnUpdateData();
     training->UpdateStatistics(box_training->currentText()); // загружаем инфу в бд
     training->UpdateAdditionalStatistics(box_training->currentText());//мы отправляем статистику ошибочных букв в бд
+    training->UpdateStatisticsPerTime(box_training->currentText(),current_mistakes,average_current_speed);
 
     but_load_training->setEnabled(true); // делаем доступными на форме
     box_training->setEnabled(true);

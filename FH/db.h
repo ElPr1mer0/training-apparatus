@@ -8,8 +8,7 @@
 class QtSql;
 class QSqlQuery;
 class HASH;
-
-
+class CHART;
 
 class DB: public QObject{
     Q_OBJECT
@@ -49,13 +48,13 @@ public:
     void LoadTraining(const QString &,const QString &, QString &);
     void LoadAdditionalStatistics(const QString &,const QString &, QString &, const QString &);
 
-    void LoadStatisticsPerTime(const QString &, const QString & ,const QString &, QList<float> &, const int &, const int & = 0, const int & = 0);
+    void LoadStatisticsPerTime(const QString &, const QString & , QList<CHART> &, const int &, const int & = 0, const int & = 0);
 
     void SendTrainingStatistics(const QString &, const QString &, const QString &);
     void SendAdditionalStatistics(const QString &, const QString &, QString &, const QString &);
     void SendAddedTraining(const QString &, const QString &);
-    void SendStatisticsPerTime(const QString &, const QString &, const int &, const QString &,
-                               const int &, const int &, const int &, const QString &);
+    void SendStatisticsPerTime(const QString &, const QString &, const int &, const int &,
+                               const int &, const int &, const int &, const float &);
 
     bool CreateCustomTraining(const QString &,const QString &, const QString &);
 

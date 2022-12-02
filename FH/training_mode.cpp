@@ -1,6 +1,8 @@
 #include "training_mode.h"
 #include "db.h"
+#include "chart.h"
 #include "QString"
+#include "QDate"
 #include "QDebug"
 #include <math.h>
 
@@ -38,6 +40,15 @@ void TRAINING::ClearStatisticsContainers(){
     word_errors.clear();
     words_speed.clear();
     words_amount.clear();
+    statistics_per_time.clear();
+}
+
+void TRAINING::UpdateStatisticsContainers(const QString &training_name){
+    GetPrintErrors(training_name,letter_errors, "letter_errors");
+    GetPrintErrors(training_name,syllable_errors, "syllable_errors");
+    GetPrintErrors(training_name,word_errors, "word_errors");
+    GetWordsSpeed(training_name);
+    GetStatisticsPerTime(training_name);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -46,7 +57,6 @@ void TRAINING::ClearStatisticsContainers(){
 // Эта функция добавляет words-файл для создания тренировки в каталог,//
 // где хранятся остальные words-файлы и откуда они загружаются        //
 bool TRAINING::AddTraining(){
-    db = new DB;
     QString content = "";
     for(auto it = word_training_list.begin();it!=word_training_list.end();++it) content += *it+'\n';
 
@@ -59,10 +69,8 @@ bool TRAINING::AddTraining(){
         for(auto it : training_names) new_training_name += it +"\n"; //создаем строку наших имен для отправки в бд
 
         db->SendAddedTraining("training",new_training_name);//добавляем название новой тренировки в бд
-        delete db;
         return true;
     }
-    delete db;
     return false;   //если что-то пошло не так при обращении к бд, то возвращаем false
 }
 
@@ -119,10 +127,8 @@ bool TRAINING::CheckCustomTrainingName(const QString &name){
 ////////////////////////////////////////////////////////////////////////
 // Эта функция формирует уровень из слов, находящихся в words-файле.////
 QString TRAINING::GetTraining(const QString &training_name){
-    db = new DB;
     QString training;
     db->LoadTraining("training",training_name, training);
-    delete db;
 
     QString line = "", level = "";
     int totalWordsInFile = 0;
@@ -173,11 +179,9 @@ QString TRAINING::GetTraining(const QString &training_name){
 // Эта функция загружает названия тренировок в комбо бокс где их можно//
 // выбрать для игры.                                                  //
 void TRAINING::GetTrainingNames(){
-    db = new DB;
     QString data = "";
     if(!training_names.empty())training_names.clear();
     db->LoadTrainingNames("training", data); //отправляем строку для получения имен режима
-    delete db;
 
     QString training = "";
     for(int i=0; i<data.length();++i){
@@ -199,19 +203,14 @@ void TRAINING::UpdateStatistics(const QString &training_name){
     statistics = QString::number(text_amount) +" "+ QString::number(record) +" "+QString::number(average_speed) +" "+QString::number(mistakes) +" "+QString::number(play_time_hours) +" "+
     QString::number(play_time_min) +" "+ QString::number(play_time_sec)+" "; // записываем в строку всю статистику
 
-    db = new DB;
     db->SendTrainingStatistics("training", training_name, statistics); //добавляем ее в бд
-
-    delete db;
 }
 
 
 void TRAINING::GetStatistics(const QString &training_name){
 
-    db = new DB;
     QString statistics;
     db->LoadTrainingStatistics("training",training_name, statistics); //отправляем строку для получения статистики по режиму
-    delete db;
 
     QString record = "";
     QString average_speed = "";
@@ -292,9 +291,8 @@ void TRAINING::MistakeReader(QString current_word, int current_pos){
 
 void TRAINING::GetPrintErrors(const QString& training_name, QMap<QString, int> &container,const QString &errors_mode){// имя режима, сам контейнер, его название
     QString statistics;
-    db = new DB;
+
     db->LoadAdditionalStatistics("training",training_name, statistics, errors_mode); //получаем данные из бд
-    delete db;
 
     QString key;
     QString value = "";
@@ -316,9 +314,7 @@ void TRAINING::GetPrintErrors(const QString& training_name, QMap<QString, int> &
 
 void TRAINING::GetWordsSpeed(const QString &training_name){
     QString statistics;
-    db = new DB;
     db->LoadAdditionalStatistics("training",training_name,statistics,"words_speed");
-    delete db;
 
     QString key;
     QString value1 ="", value2 = "";
@@ -346,7 +342,7 @@ void TRAINING::UpdateAdditionalStatistics(const QString &training_name){ //на�
     else{
         QString statistics = "";
         for(auto it = letter_errors.begin();it!=letter_errors.end();++it) statistics += it.key()+" "+QString::number(it.value())+'\n';    //записываем статистику в строку для отправки в бд
-        db = new DB;
+
         db->SendAdditionalStatistics("training",training_name, statistics, "letter_errors");
 
         statistics = "";
@@ -362,20 +358,55 @@ void TRAINING::UpdateAdditionalStatistics(const QString &training_name){ //на�
         auto it2 = words_amount.begin(); //так как words_speed и words_amount полностью равны, то проверяю на выход только один it
         for(auto it = words_speed.begin(); it!=words_speed.end();++it,++it2) statistics += it.key()+" "+QString::number(it.value())+" " + QString::number(it2.value()) + '\n';
         db->SendAdditionalStatistics("training", training_name, statistics, "words_speed");
-        delete db;
     }
 }
 
-void TRAINING::UpdateStatisticsPerTime(const QString &training_name){
-    db = new DB;
-    db->LoadStatisticsPerTime("training", training_name,"speed",speed_per_time,2020,11,24);
+void TRAINING::UpdateStatisticsPerTime(const QString &training_name, const float &current_mistakes,const int &current_speed){
+    bool is_update = false;
+    for(auto it = statistics_per_time.begin(); it<statistics_per_time.end();++it)
+        if(it->year == date->currentDate().year())
+            if(it->month == date->currentDate().month())
+                if(it->day == date->currentDate().day()){
+                    it->mistakes = (it->mistakes*it->amount+current_mistakes)/(it->amount+1);
+                    it->speed = (it->speed*it->amount+current_speed)/(it->amount+1);
+                    ++it->amount; //если обновили элемент, то его нужно перезаписать в бд после этого
+                    db->SendStatisticsPerTime("training", training_name,it->year, it->month, it->day, it->speed, it->amount, it->mistakes);
+                    is_update = true;
+                    qDebug()<<"Статистика за этот день уже есть, обновляем! ";
+                    break;
+                }
 
-    delete db;
+    if(!is_update){
+        db->SendStatisticsPerTime("training", training_name,date->currentDate().year(), date->currentDate().month(), date->currentDate().day(),
+                                  current_speed, 1, current_mistakes);
+        CHART chart; //если до этого не было таких данных в бд, их нужно создать и добавить в лист и в саму бд
+        chart.amount = 1;
+        chart.speed = current_speed;
+        chart.mistakes = current_mistakes;
+        chart.year = date->currentDate().year();
+        chart.month = date->currentDate().month();
+        chart.day = date->currentDate().day();
+
+        statistics_per_time.append(chart);
+        qDebug()<<"Статистика за день была создана! ";
+    }
 
 }
 
-void TRAINING::GetStatisticsPerTime(const QString &){
+void TRAINING::GetStatisticsPerTime(const QString &training_name){
+    db->LoadStatisticsPerTime("training", training_name,statistics_per_time,date->currentDate().year(),
+                              date->currentDate().month(),date->currentDate().day());
 
+}
+
+TRAINING::TRAINING(){
+    db = new DB;
+    date = new QDate;
+}
+
+TRAINING::~TRAINING(){
+    delete db;
+    delete date;
 }
 
 

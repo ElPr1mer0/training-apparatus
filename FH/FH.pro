@@ -22,6 +22,7 @@ SOURCES += \
     hash.cpp
 
 HEADERS += \
+    chart.h \
     db.h \
     object_memory_test.h \
     print_window_logic.h \

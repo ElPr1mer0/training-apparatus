@@ -5,9 +5,11 @@
 
 class  QString;
 class DB;
+class QDate;
+class CHART;
 
 
-#define TOTAL_WORDS_PER_LEVEL 30
+#define TOTAL_WORDS_PER_LEVEL 5
 #define SYMBOLS_LIMIT 10000
 
 class TRAINING{
@@ -33,15 +35,14 @@ public:
     QMap<QString, int> words_amount; // слово, скорость, кол-во
     QMap<QString, float> words_speed;
 
-    QList<float> mistakes_per_time; // кол-во ошибок за время по тексту режима
-    QList<float> speed_per_time; // средняя скорость за время
-    QList<float> amount_per_time; // кол-во текстов за время
-
+    QList<CHART> statistics_per_time;
 
 
 private:
+    QDate *date = nullptr;
     DB *db = nullptr;
 
+private:
     void AddErrorInConteiner(QMap<QString, int>&, QString &letter); // используется в MistakeReader
     void GetStatisticsValue(QString &,QString &, int &);
     bool CheckGap(const QString &);
@@ -52,6 +53,7 @@ public:
     void GetTrainingNames();
 
     void ClearStatisticsContainers();
+    void UpdateStatisticsContainers(const QString &);
 
     bool CheckWordForTrainingList(const QString &);//проверка правильности написания слова перед добавлением в training_list для создания своей тренировки
     bool CheckCustomTrainingName(const QString &);
@@ -66,8 +68,11 @@ public:
     void GetWordsSpeed(const QString&);
     void UpdateAdditionalStatistics(const QString &);
 
-    void UpdateStatisticsPerTime(const QString&);
+    void UpdateStatisticsPerTime(const QString&, const float&, const int&);
     void GetStatisticsPerTime(const QString&);
+
+    TRAINING();
+    ~TRAINING();
 };
 
 #endif // TRAINING_MODE_H

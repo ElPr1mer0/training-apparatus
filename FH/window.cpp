@@ -9,7 +9,7 @@
 WINDOW::WINDOW(QWidget *parent) : QWidget(parent){
     //SetRegisterWindow();
    // SetHomeWindow(register_page);
-   // SetPrintWindow();
+    SetPrintWindow();
   // SetReactionSpeedWindow();
     //SetCreateTrainingWindow();
 
@@ -115,9 +115,6 @@ void WINDOW::SetHomeWindow(QWidget *page){
 }
 
 void WINDOW::SetPrintWindow(){
-
-   // delete db;
-
     print_page = new QWidget;
     WINDOW::DeletePageFromLay(home_page);
     my_style->SetPrintSpeedWindowStyle(print_page);

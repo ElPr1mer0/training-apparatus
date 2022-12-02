@@ -1,5 +1,6 @@
 #include "db.h"
 #include "hash.h"
+#include "chart.h"
 
 #include <QtSql>
 #include <QSqlError>
@@ -150,65 +151,36 @@ void DB::LoadAdditionalStatistics(const QString &mode_name,const QString &traini
     }
 }
 
-void DB::LoadStatisticsPerTime(const QString &mode_name, const QString &training_name,const QString &res_table_name, QList<float> &res_per_time,
-                          const int &year, const int &mounth, const int &day){
+void DB::LoadStatisticsPerTime(const QString &mode_name, const QString &training_name, QList<CHART> &statistics_per_time,
+                          const int &year, const int &month, const int &day){
 
-    if(day != 0){ // за день
-        if(Query("SELECT  "+res_table_name+" FROM statistics_per_time "
-                 "WHERE id = "+ QString::number(user_id)+" AND training_name = '"+ training_name +"' AND "
-                 "mode_name = '"+mode_name+"' AND year = "+ QString::number(year)+" AND mounth = "+ QString::number(mounth)+
-                 " AND day = "+QString::number(day))){
-            if(!record_exist) qDebug()<<"За этот период ничего нет!";
-            else{
-                query = new QSqlQuery(*db);
-                query->exec("SELECT  "+res_table_name+" FROM statistics_per_time "
-                            "WHERE id = "+ QString::number(user_id)+" AND training_name = '"+ training_name +"' AND "
-                            "mode_name = '"+mode_name+"' AND year = "+ QString::number(year)+" AND mounth = "+ QString::number(mounth)+
-                            " AND day = "+QString::number(day));
-                while(query->next()){
-                    res_per_time.append(query->value(0).toFloat());
-                }
-                qDebug()<<res_table_name+"' за год загружена из базы данных!";
-                delete query;
-            }
-        }
-    }else if(mounth != 0){ // за месяц
+    if(Query("SELECT speed, amount, mistakes FROM statistics_per_time "
+            "WHERE id = "+ QString::number(user_id)+" AND training_name = '"+ training_name +"' AND "
+            "mode_name = '"+mode_name+"' AND year = "+ QString::number(year)+" AND month = "+
+             QString::number(month)+" AND day = "+ QString::number(day))){
 
-        if(Query("SELECT  "+res_table_name+" FROM statistics_per_time "
-                 "WHERE id = "+ QString::number(user_id)+" AND training_name = '"+ training_name +"' AND "
-                 "mode_name = '"+mode_name+"' AND year = "+ QString::number(year)+" AND mounth = "+ QString::number(mounth))){
-            if(!record_exist) qDebug()<<"За этот период ничего нет!";
-            else{
-                query = new QSqlQuery(*db);
-                query->exec("SELECT "+res_table_name+" FROM statistics_per_time "
-                            "WHERE id = "+ QString::number(user_id)+" AND training_name = '"+ training_name +"' AND "
-                            "mode_name = '"+mode_name+"' AND year = "+ QString::number(year)+" AND mounth ="+ QString::number(mounth));
-                while(query->next()){
-                    res_per_time.append(query->value(0).toFloat());
-                }
-                qDebug()<<res_table_name+" за месяц загружена из базы данных!";
-                delete query;
+        if(!record_exist) qDebug()<<"За этот период ничего нет!";
+        else{
+            query = new QSqlQuery(*db);
+            query->exec("SELECT speed, amount, mistakes FROM statistics_per_time "
+                        "WHERE id = "+ QString::number(user_id)+" AND training_name = '"+ training_name +"' AND "
+                        "mode_name = '"+mode_name+"' AND year = "+ QString::number(year)+" AND month = "+
+                        QString::number(month)+" AND day = "+ QString::number(day));
+            while(query->next()){
+                CHART chart;
+                chart.speed = query->value("speed").toInt();
+                chart.amount = query->value("amount").toInt();
+                chart.mistakes = query->value("mistakes").toFloat();
+                chart.year = year;
+                chart.month = month;
+                chart.day = day;
+                statistics_per_time.append(chart);
             }
+            qDebug()<<" Статистика за время загружена из базы данных!";
+            delete query;
         }
-    }else{ // за год
+    }
 
-        if(Query("SELECT  "+res_table_name+" FROM statistics_per_time "
-                     "WHERE id = "+ QString::number(user_id)+" AND training_name = '"+ training_name +"' AND "
-                     "mode_name = '"+mode_name+"' AND year = "+ QString::number(year))){
-                if(!record_exist) qDebug()<<"За этот период ничего нет!";
-                else{
-                    query = new QSqlQuery(*db);
-                    query->exec("SELECT "+res_table_name+" FROM statistics_per_time "
-                                "WHERE id = "+ QString::number(user_id)+" AND training_name = '"+ training_name +"' AND "
-                                "mode_name = '"+mode_name+"' AND year = "+ QString::number(year));
-                    while(query->next()){
-                        res_per_time.append(query->value(0).toFloat());
-                    }
-                    qDebug()<<res_table_name+" за день загружена из базы данных!";
-                    delete query;
-                }
-            }
-        }
 }
 
 
@@ -254,11 +226,37 @@ void DB::SendAddedTraining(const QString &mode_name, const QString &training_nam
     delete query;
 }
 
-void DB::SendStatisticsPerTime(const QString &mode_name, const QString &training_name, const int &year, const QString &mounth,
-                               const int &day, const int &speed, const int &amount, const QString &mistakes){
+void DB::SendStatisticsPerTime(const QString &mode_name, const QString &training_name, const int &year, const int &month,
+                               const int &day, const int &speed, const int &amount, const float &mistakes){
+
+    if(!Query("SELECT speed FROM statistics_per_time "
+              "WHERE id = " +QString::number(user_id)+" AND mode_name = '"+mode_name+"' AND training_name = '"+training_name +"' "
+              "AND year = "+QString::number(year)+" AND month = "+QString::number(month)+" AND day = "+QString::number(day))){
+
+        //если не находит скорость по поступившим данным, то такой записи еще не было, нужно добавить
+        query = new QSqlQuery(*db);
+        if(!record_exist){
+            if(query->exec("INSERT INTO statistics_per_time (id, mode_name, training_name, year, month, day, speed, amount, mistakes)"
+               "VALUES ("+QString::number(user_id)+", '"+mode_name+"', '"+training_name+"', "+ QString::number(year)+", "+
+               QString::number(month)+", "+QString::number(day)+", " +QString::number(speed)+", "+QString::number(speed)+
+               +", "+QString::number(amount)+", "+QString::number(mistakes)+")")) qDebug()<<"Данные за сегодня созданы в бд!"; //если записи не было, добавляем
+
+            else qDebug()<<"Ошибка создания данных за сегодня!";
+        }
+
+    }else{//иначе обновляем существующую запись
+        query = new QSqlQuery(*db);
+        if(query->exec("UPDATE statistics_per_time set speed = "+ QString::number(speed) +", mistakes = "+QString::number(mistakes)+
+           ", amount = "+QString::number(amount)+" "
+           "WHERE id = " +QString::number(user_id)+" AND mode_name = '"+mode_name+"' AND training_name = '"+training_name +"' "
+           "AND year = "+QString::number(year)+" AND month = "+QString::number(month)+" AND day = "+QString::number(day)))
+        qDebug()<<"Данные за сегодня обновлены!";
+        else qDebug()<<"Ошибка обновления таблицы!";
+
+    }
+    delete query;
 
 }
-
 
 
 
