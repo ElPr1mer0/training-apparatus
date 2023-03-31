@@ -7,6 +7,10 @@ class QLabel;
 class QLineEdit;
 class QPushButton;
 class QTextBrowser;
+class QCustomPlot;
+class QComboBox;
+class QGroupBox;
+class QToolBox;
 
 class WIDGET_STYLE: public QWidget{
     Q_OBJECT
@@ -29,12 +33,19 @@ public:
 
     ///ОКНО HOME///
     void SetHomeWindowStyle(QWidget*);
+    void SetTBHomePanelStyle(QToolBox *);
     ///ОКНО HOME///
 
 
     ///ОКНО ПЕЧАТИ///
     void SetPrintSpeedWindowStyle(QWidget*);
     void SetTextBrowserStyle(QTextBrowser*);
+    void SetPlotSpeedStyle(QCustomPlot*);
+    void SetPlotMistakeStyle(QCustomPlot*);
+    void SetPlotAmountTextStyle(QCustomPlot*);
+    void SetBoxsYearsStyle(QComboBox*);
+    void SetBoxsMonthsStyle(QComboBox*);
+    void SetGroupPlotStyle(QGroupBox*);
 
     ///ДОП ОКНО СОЗДАНИЯ ТРЕНИРОВКИ///
     void SetCreateTrainingWindowStyle(QWidget*);
@@ -57,9 +68,6 @@ public:
     void SetLabInfoStyle(QLabel*);
     void SetLabResultStyle(QLabel*);
     ///ОКНО ТЕСТА НА РЕАКЦИЮ///
-
-
-
 };
 
 #endif // WIDGET_STYLE_H

@@ -1,6 +1,9 @@
 #include "print_window_logic.h"
 #include "training_mode.h"
+#include "qcustomplot.h"
 #include "sounds.h"
+#include "chart.h"
+#include <algorithm>
 
 #include <cmath>
 #include <QtWidgets>
@@ -14,13 +17,25 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_start, QPushButton *but_
  QLineEdit *ld_game_pole, QLineEdit *ld_current_mistakes, QLineEdit *ld_current_speed, QLineEdit *ld_text_amount,
  QLineEdit *ld_record, QLineEdit *ld_average_speed, QLineEdit *ld_mistakes, QLineEdit *ld_all_time,
  QLineEdit *ld_current_min, QLineEdit *ld_current_sec, QTextBrowser *text_browser, QLabel* lab_current_mistakes,
- QPushButton *but_create_training, QPushButton *but_add_training){
-
+ QPushButton *but_create_training, QPushButton *but_add_training,QPushButton *but_show_group_plot, QCustomPlot *plot,
+ QPushButton *but_hide_group_plot, QComboBox *box_from_year, QComboBox *box_from_month, QComboBox *box_to_year,
+ QComboBox *box_to_month, QGroupBox *group_plot, QLineEdit *ld_plot_value, QGroupBox *group_game_pole,
+ QCheckBox *chbox_amount_text, QCheckBox *chbox_speed, QCheckBox *chbox_mistake, QCheckBox *chbox_letter_errors,
+ QCheckBox *chbox_syllable_errors, QCheckBox *chbox_word_errors , QCheckBox *chbox_words_speed,
+ QPushButton *but_show_word_statistic, QGroupBox *group_report, QPushButton *but_create_errors_training){
     this->but_start = but_start;
     this->but_load_training = but_load_training;
     this->but_create_training = but_create_training;
     this->but_add_training = but_add_training;
+    this->but_show_group_plot = but_show_group_plot;
+    this->but_hide_group_plot = but_hide_group_plot;
+    this->but_show_word_statistic = but_show_word_statistic;
+    this->but_create_errors_training = but_create_errors_training;
     this->box_training = box_training;
+    this->box_from_year = box_from_year;
+    this->box_from_month = box_from_month;
+    this->box_to_year = box_to_year;
+    this->box_to_month = box_to_month;
     this->ld_game_pole = ld_game_pole;
     this->ld_current_mistakes = ld_current_mistakes;
     this->ld_current_speed = ld_current_speed;
@@ -31,11 +46,27 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_start, QPushButton *but_
     this->ld_all_time = ld_all_time;
     this->ld_current_min = ld_current_min;
     this->ld_current_sec = ld_current_sec;
+    this->ld_plot_value  = ld_plot_value;
     this->text_browser = text_browser;
     this->lab_current_mistakes = lab_current_mistakes;
+    this->plot = plot;
+    this->group_plot = group_plot;
+    this->group_game_pole = group_game_pole;
+    this->group_report = group_report;
+    this->chbox_amount_text = chbox_amount_text;
+    this->chbox_mistake = chbox_mistake;
+    this->chbox_speed = chbox_speed;
+    this->chbox_letter_errors = chbox_letter_errors;
+    this->chbox_syllable_errors = chbox_syllable_errors;
+    this->chbox_word_errors = chbox_word_errors;
+    this->chbox_words_speed = chbox_words_speed;
+
     this->ld_game_pole->setEnabled(false);
     this->but_start->setEnabled(false);
     this->box_training->clear();
+    this->chbox_speed->setCheckState(Qt::Checked);
+    this->chbox_letter_errors->setCheckState(Qt::Checked);
+
 
     sounds = new SOUNDS;
 
@@ -47,9 +78,30 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_start, QPushButton *but_
     connect (pause_timer, SIGNAL(timeout()),this, SLOT(OnPauseTime()));
 
     connect(this->box_training,SIGNAL(currentIndexChanged(int)),this,SLOT(BoxTrainingCurrentIndexChanged(int)));
+    connect(this->box_from_year,SIGNAL(currentIndexChanged(int)),this,SLOT(BoxFromYearCurrentIndexChanged(int)));
+    connect(this->box_from_month,SIGNAL(currentIndexChanged(int)),this,SLOT(BoxFromMonthCurrentIndexChanged(int)));
+    connect(this->box_to_year,SIGNAL(currentIndexChanged(int)),this,SLOT(BoxToYearCurrentIndexChanged(int)));
+    connect(this->box_to_month,SIGNAL(currentIndexChanged(int)),this,SLOT(BoxToMonthCurrentIndexChanged(int)));
+
     connect(this->but_load_training, SIGNAL(clicked()),this,SLOT(ButLoadTrainingClicked()));
     connect(this->but_start, SIGNAL(clicked()),this, SLOT(ButStartClicked()));
+    connect(this->but_show_group_plot, SIGNAL(clicked()),this,SLOT(ButShowGroupPlotClicked()));
+    connect(this->but_hide_group_plot, SIGNAL(clicked()),this, SLOT(ButHideGroupPlotClicked()));
+    connect(this->but_show_word_statistic, SIGNAL(clicked()), this, SLOT(ButShowWordStatistic()));
+    connect(this->but_create_errors_training, SIGNAL(clicked()), this, SLOT(ButCreateErrorsTrainingClicked()));
+
     connect(this->ld_game_pole, SIGNAL(textChanged(QString)), this, SLOT(LdFieldTextChanged(QString)));
+
+    connect(this->plot, &QCustomPlot::mousePress, this, &PRINT_WINDOW_LOGIC::PlotMousePress);
+    connect(this->plot, &QCustomPlot::mouseMove, this, &PRINT_WINDOW_LOGIC::PlotMouseMove);
+
+    connect(this->chbox_amount_text, SIGNAL(clicked()),this, SLOT(CHBoxAmountTextChecked()));
+    connect(this->chbox_speed, SIGNAL(clicked()),this, SLOT(CHBoxSpeedChecked()));
+    connect(this->chbox_mistake, SIGNAL(clicked()),this, SLOT(CHBoxMistakeChecked()));
+    connect(this->chbox_letter_errors, SIGNAL(clicked()),this, SLOT(CHBoxLetterErrorsChecked()));
+    connect(this->chbox_syllable_errors, SIGNAL(clicked()),this, SLOT(CHBoxSyllableErrorsChecked()));
+    connect(this->chbox_word_errors, SIGNAL(clicked()),this, SLOT(CHBoxWordErrorsChecked()));
+    connect(this->chbox_words_speed, SIGNAL(clicked()),this, SLOT(CHBoxWordsSpeedChecked()));
 
     training->GetStatistics(this->box_training->currentText());//загружаем данные для режима в переменные
     OnUpdateData(); //добавляем на форму
@@ -258,9 +310,11 @@ QLineEdit *ld_current_symbols, QLabel *lab_status, QTextBrowser *browser_trainin
 // Эта функция обрабатывает события изменения вводимого текста в      //
 // игровое поле в ходе игры. Проверяет на победу.                     //
 void PRINT_WINDOW_LOGIC::LdFieldTextChanged(QString current_word){
-    if(start_writing){
-        start_ms = ms + sec*1000 + min*60*1000; //считаем кол-во мс, которые прошли с начала набора слова
-        start_writing = false;
+    if(!errors_mode){ //!errors_mode если равен true, то это режим исправления ошибок, статистику нам тут ловить не надо
+        if(start_writing){
+            start_ms = ms + sec*1000 + min*60*1000; //считаем кол-во мс, которые прошли с начала набора слова
+            start_writing = false;
+        }
     }
 
     if(current_word.length()- 1 + line_size  == letter) { // + lineSize, так как мы обнуляем нашу строку после пробела
@@ -280,12 +334,11 @@ void PRINT_WINDOW_LOGIC::LdFieldTextChanged(QString current_word){
                     sounds->Play(sounds->print_error); //звук ошибки
                     is_mistake = true;
                     first_time = false;
-                    training->MistakeReader(edit_text, letter); // для анализа ошибок
+                    if(!errors_mode) training->MistakeReader(edit_text, letter); // для анализа ошибок
                 }
 
         }else{    // если правильно ввели букву
 
-            //if(current_word[letter - line_size] != ' ')  end_ms = ms + sec*1000 + min*60*1000;//это для запоминания конечного значения ввода слова
             was_minus = false;                            // для статистики скорости набора слова
             is_mistake = false;
             letter++;
@@ -293,12 +346,14 @@ void PRINT_WINDOW_LOGIC::LdFieldTextChanged(QString current_word){
             if(current_word[letter - 1 - line_size] == ' '){ //когда ввели все слово правильно -1, так как до этого выше увеличил на 1, а это значени след буквы
                 line_size = letter;
 
-                training->WordSpeedReader(ld_game_pole->text(),ld_game_pole->text().length()-1,abs(end_ms-start_ms)); //передаем длину слова и время написания его в мс
-                start_writing = true;                                               // length()-1, чтобы пробел не учитывать
+                if(!errors_mode){
+                    training->WordSpeedReader(ld_game_pole->text(),ld_game_pole->text().length()-1,abs(end_ms-start_ms)); //передаем длину слова и время написания его в мс
+                    start_writing = true;                                               // length()-1, чтобы пробел не учитывать
+                }
 
                 ld_game_pole->clear();
             }else if(edit_text.length() - 1 == letter){
-                training->WordSpeedReader(ld_game_pole->text()+" ",ld_game_pole->text().length(),abs(end_ms-start_ms)); // добавляю здесь " ", так как в другой функции
+                if(!errors_mode) training->WordSpeedReader(ld_game_pole->text()+" ",ld_game_pole->text().length(),abs(end_ms-start_ms)); // добавляю здесь " ", так как в другой функции
             }                                                                                       //всегда удаляю пробел, а в конце строки его нет
 
             if(edit_text.length() -1  == letter){ //проверка на конец текста, -2 так как в конце каждой строки есть символ перехода на новую
@@ -345,6 +400,7 @@ void PRINT_WINDOW_LOGIC::ButStartClicked(){
         but_start->setEnabled(false);
         box_training->setEnabled(false);
 
+
         letter = 0; // надо каждый раз сбрасывать для корректной работы считывания строки + отображения статистики
         line_size = 0;
         mistakes = 0;
@@ -353,6 +409,8 @@ void PRINT_WINDOW_LOGIC::ButStartClicked(){
         min = 0;
         timer = new QTimer(this); //создаем таймер
         connect (timer, SIGNAL(timeout()),this, SLOT(OnTime()));
+
+        group_report->setEnabled(false);
     }
 }
 ////////////////////////////////////////////////////////////////////////
@@ -364,8 +422,140 @@ void PRINT_WINDOW_LOGIC::ButStartClicked(){
 
 
 void PRINT_WINDOW_LOGIC::ButLoadTrainingClicked(){
+    errors_mode = false;
     text_browser->clear();
     text_browser->insertPlainText(training->GetTraining(box_training->currentText()));
+    edit_text = text_browser->toPlainText();
+    but_start->setEnabled(true);
+}
+
+void PRINT_WINDOW_LOGIC::ButShowGroupPlotClicked(){
+    group_game_pole->setVisible(false);
+    group_report->setVisible(false);
+    group_plot->setVisible(true);
+    but_show_group_plot->setEnabled(false);
+
+    double now = QDateTime::currentDateTimeUtc().toTime_t();
+    QDate *date = new QDate;
+
+    plot->addGraph();
+    QVector<QCPGraphData> graph_data(training->statistics_per_time.length());// помещаем наши данные для отображения:
+    QString type;
+    if(chbox_amount_text->isChecked()) type = "Кол-во текстов";
+    else if(chbox_speed->isChecked()) type = "Скорость";
+    else if(chbox_mistake->isChecked()) type = "Ошибки %";
+
+    training->DetermineDayCoffForPlot(now,graph_data, type); // обрабатываем дни для графика
+
+    plot->graph(0)->data()->set(graph_data);
+
+    QColor color(149,137,250);
+    plot->graph()->setLineStyle(QCPGraph::lsStepCenter); //настраиваем кисть
+    plot->graph()->setPen(QPen(color.lighter(200)));
+    plot->graph()->setBrush(QBrush(color));
+    plot->graph()->setName("Тренировка скорости за время");
+
+    tracer = new QCPItemTracer(plot);
+    tracer->setGraph(plot->graph(0));   // Трассировщик будет работать с графиком   
+
+    plot->xAxis->setRange(now -24*3600*10, now+24*3600*10);//диапазон отображения данных по X и Y
+
+    if(type == "Скорость"){
+        QSharedPointer<QCPAxisTickerText> textTicker(new QCPAxisTickerText); //подпись данных по Y
+        for(int i = 0; i<=700; i+=35) textTicker->addTick(i, QString::number(i));
+        plot->yAxis->setTicker(textTicker);
+        plot->yAxis->setLabel("Скорость");
+        plot->yAxis->setRange(0, 700);
+    }else if(type =="Ошибки %"){
+        QSharedPointer<QCPAxisTickerText> textTicker(new QCPAxisTickerText); //подпись данных по Y
+        for(int i = 0; i<=40; i+=2) textTicker->addTick(i, QString::number(i) + "%");
+        plot->yAxis->setTicker(textTicker);
+        plot->yAxis->setLabel("Ошибки %");
+        plot->yAxis->setRange(0, 40);
+    }else{
+        QSharedPointer<QCPAxisTickerText> textTicker(new QCPAxisTickerText); //подпись данных по Y
+        for(int i = 0; i<=200; i+=10) textTicker->addTick(i, QString::number(i));
+        plot->yAxis->setTicker(textTicker);
+        plot->yAxis->setRange(0, 200);
+        plot->yAxis->setLabel("Кол-во текстов");
+    }
+    plot->replot();
+    delete date;
+}
+
+void PRINT_WINDOW_LOGIC::ButHideGroupPlotClicked(){
+    group_plot->setVisible(false);
+    group_report->setVisible(true);
+    group_game_pole->setVisible(true);
+    but_show_group_plot->setEnabled(true);
+    delete tracer;
+}
+
+void PRINT_WINDOW_LOGIC::ButShowWordStatistic(){
+    text_browser->clear();
+    QString type;
+    if(chbox_letter_errors->isChecked()) type = "Ошибки в буквах:";
+    else if(chbox_syllable_errors->isChecked()) type = "Ошибки в слогах:";
+    else if (chbox_word_errors->isChecked()) type = "Ошибки в словах:";
+    else type = "Средняя скорость набора слова:";
+    text_browser->insertPlainText("                     " + type+ "\n" );
+
+    std::vector<QString> keys;
+    std::vector<float> values;
+
+    if(chbox_letter_errors->isChecked()){
+        training->SortBufPrintStatistics(training->letter_errors, keys, values);
+
+        for(unsigned long it = 0; it<values.size(); ++it) //вывод отсортированных данных в браузер
+                text_browser->insertPlainText("Буква: "+keys[it] +"; Кол-во ошибок при написании: "+QString::number(values[it])+"\n");
+    }
+    else if(chbox_syllable_errors->isChecked()){
+        training->SortBufPrintStatistics(training->syllable_errors, keys, values);
+
+        for(unsigned long it = 0; it<values.size(); ++it) //вывод отсортированных данных в браузер
+                text_browser->insertPlainText("Слог: "+keys[it] +"; Кол-во ошибок при написании: "+QString::number(values[it])+"\n");
+
+    }
+    else if (chbox_word_errors->isChecked()){
+        training->SortBufPrintStatistics(training->word_errors, keys, values);
+
+        for(unsigned long it = 0; it<values.size(); ++it) //вывод отсортированных данных в браузер
+            text_browser->insertPlainText("Слово: "+keys[it] +"; Кол-во ошибок при написании: "+QString::number(values[it])+"\n");
+    }
+    else {
+        std::vector<int> values2;
+        for(auto it = training->words_speed.begin(); it!=training->words_speed.end(); ++it){ //без сортировки
+            keys.push_back(it.key()); // записываю переменные в буферные вектора (слово)
+            values.push_back(it.value());//скорость слова
+         }
+        for(auto it = training->words_amount.begin(); it!=training->words_amount.end();++it) values2.push_back(it.value()); //сколько раз набирал
+
+        for(unsigned long i = 0; i<values.size(); ++i) //сортировка буф векторов
+            for(unsigned long i = 0; i<values.size()-1; ++i){
+                if(values[i]<values[i+1]){
+                    std::swap(values[i],values[i+1]); // сортирую по кол-во ошибок
+                    std::swap(keys[i],keys[i+1]);
+                    std::swap(values2[i], values2[i+1]);
+                }
+            }
+
+
+        for(unsigned long i = 0; i<values.size(); ++i) //вывод отсортированных данных в браузер
+            text_browser->insertPlainText("Слово: "+keys[i]+"; Написано: "+ QString::number(values2[i]) +
+            "; Средняя скорость при написании: "+QString::number(values[i])+"\n");
+    }
+}
+
+void PRINT_WINDOW_LOGIC::ButCreateErrorsTrainingClicked(){
+    if(chbox_words_speed->isChecked()){
+        qDebug()<<"Выберите режим с ошибками!";
+        return;
+    }
+    errors_mode = true;
+    text_browser->clear();
+    if(chbox_letter_errors->isChecked()) text_browser->insertPlainText(training->GetErrorsTraining(training->letter_errors));
+    else if (chbox_syllable_errors->isChecked()) text_browser->insertPlainText(training->GetErrorsTraining(training->syllable_errors));
+    else if (chbox_word_errors->isChecked()) text_browser->insertPlainText(training->GetErrorsTraining(training->word_errors));
     edit_text = text_browser->toPlainText();
     but_start->setEnabled(true);
 }
@@ -384,6 +574,138 @@ void PRINT_WINDOW_LOGIC::BoxTrainingCurrentIndexChanged(int){
 
     training->ClearStatisticsContainers();
     training->UpdateStatisticsContainers(box_training->currentText());
+}
+
+void PRINT_WINDOW_LOGIC::BoxFromYearCurrentIndexChanged(int index){
+    if(index > box_to_year->currentIndex()){
+        qDebug()<<"Значение начала промежутка не может быть больше конца!";
+        box_from_year->setCurrentIndex(training->from_year - 2019); // возвращаем значение до изменения
+        return;
+    }
+
+    if(box_to_month->currentIndex() < box_from_month->currentIndex()){
+        box_to_month->setCurrentIndex(box_from_month->currentIndex());
+        training->to_month = training->from_month;
+
+    }
+    training->from_year = index + 2019; // + 2019, чтобы вести отчет с 2019 года
+}
+
+void PRINT_WINDOW_LOGIC::BoxFromMonthCurrentIndexChanged(int index){
+    if(index > box_to_month->currentIndex() && box_from_year->currentIndex() == box_to_year->currentIndex()){
+        qDebug()<<"Значение начала промежутка не может быть больше конца!";
+        box_from_month->setCurrentIndex(training->from_month - 1);
+        return;
+    }
+    training->from_month = index + 1; // +1, чтобы вести с января
+}
+
+void PRINT_WINDOW_LOGIC::BoxToYearCurrentIndexChanged(int index){
+    if(index < box_from_year->currentIndex()){
+        qDebug()<<"Значение конца промежутка не может быть меньше начала!";
+        box_to_year->setCurrentIndex(training->to_year - 2019);
+        return;
+    }
+
+    if(box_to_month->currentIndex() < box_from_month->currentIndex()){
+        box_to_month->setCurrentIndex(box_from_month->currentIndex());
+        training->to_month = training->from_month;
+
+    }
+
+    training->to_year = index + 2019;
+}
+
+void PRINT_WINDOW_LOGIC::BoxToMonthCurrentIndexChanged(int index){
+    if(index < box_from_month->currentIndex() && box_from_year->currentIndex() == box_to_year->currentIndex()){
+        qDebug()<<"Значение конца промежутка не может быть меньше начала!";
+        box_to_month->setCurrentIndex(training->to_month - 1);
+        return;
+    }
+    training->to_month = index + 1;
+}
+
+void PRINT_WINDOW_LOGIC::PlotMousePress(QMouseEvent *event){
+    double coordX = plot->xAxis->pixelToCoord(event->pos().x()); // Определяем координату X на графике, где был произведён клик мышью
+
+    QString type;
+    if(chbox_amount_text->isChecked()) type = "Кол-во текстов";
+    else if(chbox_speed->isChecked()) type = "Скорость";
+    else if(chbox_mistake->isChecked()) type = "Ошибки %";
+
+    tracer->setGraphKey(coordX); // По координате X клика мыши определим ближайшие координаты для трассировщика
+    plot->replot(); // Перерисовываем содержимое полотна графика
+
+    double now = tracer->position->key(); //получаем дату
+    QDateTime *date = new QDateTime;
+    date->setTime_t(now); // Выводим координаты точки графика, где установился трассировщик, в ld_plot_value
+    QString res_message;
+    if(type == "Кол-во текстов") res_message = "Текстов набранно";
+    else if(type == "Скорость") res_message = "Скорость по пройденным текстам в симв/м";
+    else res_message = "Ошибок по пройденным текстам в %";
+
+    ld_plot_value->setText("Дата: " + date->date().toString()+"; "+ res_message+ ": " + QString::number(tracer->position->value()));
+
+    delete date;
+}
+
+void PRINT_WINDOW_LOGIC::PlotMouseMove(QMouseEvent *event){
+    if(QApplication::mouseButtons()) PlotMousePress(event);
+}
+
+void PRINT_WINDOW_LOGIC::CHBoxSpeedChecked(){
+    chbox_speed->setCheckState(Qt::Checked);
+    chbox_mistake->setCheckState(Qt::Unchecked);
+    chbox_amount_text->setCheckState(Qt::Unchecked);
+    ld_plot_value->clear();
+    delete tracer;
+    ButShowGroupPlotClicked();
+}
+
+void PRINT_WINDOW_LOGIC::CHBoxMistakeChecked(){
+    chbox_speed->setCheckState(Qt::Unchecked);
+    chbox_mistake->setCheckState(Qt::Checked);
+    chbox_amount_text->setCheckState(Qt::Unchecked);
+    ld_plot_value->clear();
+    delete tracer;
+    ButShowGroupPlotClicked();
+}
+
+void PRINT_WINDOW_LOGIC::CHBoxAmountTextChecked(){
+    chbox_speed->setCheckState(Qt::Unchecked);
+    chbox_mistake->setCheckState(Qt::Unchecked);
+    chbox_amount_text->setCheckState(Qt::Checked);
+    ld_plot_value->clear();
+    delete tracer;
+    ButShowGroupPlotClicked();
+}
+
+void PRINT_WINDOW_LOGIC::CHBoxLetterErrorsChecked(){
+    chbox_letter_errors->setCheckState(Qt::Checked);
+    chbox_syllable_errors->setCheckState(Qt::Unchecked);
+    chbox_word_errors->setCheckState(Qt::Unchecked);
+    chbox_words_speed->setCheckState(Qt::Unchecked);
+}
+
+void PRINT_WINDOW_LOGIC::CHBoxSyllableErrorsChecked(){
+    chbox_letter_errors->setCheckState(Qt::Unchecked);
+    chbox_syllable_errors->setCheckState(Qt::Checked);
+    chbox_word_errors->setCheckState(Qt::Unchecked);
+    chbox_words_speed->setCheckState(Qt::Unchecked);
+}
+
+void PRINT_WINDOW_LOGIC::CHBoxWordErrorsChecked(){
+    chbox_letter_errors->setCheckState(Qt::Unchecked);
+    chbox_syllable_errors->setCheckState(Qt::Unchecked);
+    chbox_word_errors->setCheckState(Qt::Checked);
+    chbox_words_speed->setCheckState(Qt::Unchecked);
+}
+
+void PRINT_WINDOW_LOGIC::CHBoxWordsSpeedChecked(){
+    chbox_letter_errors->setCheckState(Qt::Unchecked);
+    chbox_syllable_errors->setCheckState(Qt::Unchecked);
+    chbox_word_errors->setCheckState(Qt::Unchecked);
+    chbox_words_speed->setCheckState(Qt::Checked);
 }
 ////////////////////////////////////////////////////////////////////////
 ////////////ON_COMBO_BOX_SELECT_BOOK_CURRENT_INDEX_CHANGED//////////////
@@ -477,49 +799,57 @@ void PRINT_WINDOW_LOGIC::IsWin(){
     timer->stop();
     delete timer;
     //pause_time = PAUSE;
-    ld_game_pole->setEnabled(false);
-    ld_game_pole->clear();
+
 
     //обрабатываем полученные данные
     float average_current_speed = edit_text.length() - 1;
     average_current_speed = round(round((average_current_speed /(ld_current_min->text().toFloat()*60 + ld_current_sec->text().toFloat())*60)*100)/100);
     ld_current_speed->setText(QString::number(average_current_speed)); //считаем среднюю скорость за текст
 
-    if(average_current_speed>training->record){ // если новый рекорд
-        sounds->Play(sounds->print_record);
-        training->record = average_current_speed;
-        text_browser->insertPlainText("         New record!!!           ");
-    }
-
     float current_mistakes =  round(100*ld_current_mistakes->text().toFloat()*100/(edit_text.length()-1))/100;
     lab_current_mistakes->setText("Ошибки: ("+ QString::number(current_mistakes) +"%)");
     //считаем кол-во ошибок в процентах  // round*100/100 это нужно, чтобы было 2 знака после запятой
 
-    training->average_speed = (average_current_speed + training->text_amount*training->average_speed) / (training->text_amount+1); // средняя скорость за все время
-    training->mistakes = round(100*((round(100*ld_current_mistakes->text().toFloat()*100/(edit_text.length()-1))/100) +
-                          training->text_amount*training->mistakes)/(training->text_amount+1))/100;//среднее кол-во ошибок за все время
 
-    ++training->text_amount; //кол-во пройденных текстов стало больше на 1
+    if(!errors_mode){ // если не запущен режим по работе над ошибками, то данные надо сохранить и обновить
 
-    training->play_time_min += min; //сохраняем время
-    training->play_time_sec += sec;
-    if(training->play_time_sec >= 60){
-        training->play_time_min++;
-        training->play_time_sec-=60;
-     }
-    if( training->play_time_min >= 60){
-        training->play_time_min -=60;
-        training->play_time_hours++;
+        if(average_current_speed>training->record){ // если новый рекорд
+            sounds->Play(sounds->print_record);
+            training->record = average_current_speed;
+            text_browser->insertPlainText("         New record!!!           ");
+        }
+
+        training->average_speed = (average_current_speed + training->text_amount*training->average_speed) / (training->text_amount+1); // средняя скорость за все время
+        training->mistakes = round(100*((round(100*ld_current_mistakes->text().toFloat()*100/(edit_text.length()-1))/100) +
+                              training->text_amount*training->mistakes)/(training->text_amount+1))/100;//среднее кол-во ошибок за все время
+
+        ++training->text_amount; //кол-во пройденных текстов стало больше на 1
+
+        training->play_time_min += min; //сохраняем время
+        training->play_time_sec += sec;
+        if(training->play_time_sec >= 60){
+            training->play_time_min++;
+            training->play_time_sec-=60;
+         }
+        if( training->play_time_min >= 60){
+            training->play_time_min -=60;
+            training->play_time_hours++;
+        }
+
+        OnUpdateData();
+        training->UpdateStatistics(box_training->currentText()); // загружаем инфу в бд
+        training->UpdateAdditionalStatistics(box_training->currentText());//мы отправляем статистику ошибочных букв в бд
+        training->UpdateStatisticsPerTime(box_training->currentText(),current_mistakes,average_current_speed);
     }
 
-
-    OnUpdateData();
-    training->UpdateStatistics(box_training->currentText()); // загружаем инфу в бд
-    training->UpdateAdditionalStatistics(box_training->currentText());//мы отправляем статистику ошибочных букв в бд
-    training->UpdateStatisticsPerTime(box_training->currentText(),current_mistakes,average_current_speed);
-
+    errors_mode = false;
     but_load_training->setEnabled(true); // делаем доступными на форме
+    ld_game_pole->setEnabled(false);
+    ld_game_pole->clear();
+    group_report->setEnabled(true);
     box_training->setEnabled(true);
+    but_load_training->setEnabled(true);
+    text_browser->clear();
 }
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////ON_WIN//////////////////////////////

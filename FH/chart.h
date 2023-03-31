@@ -8,7 +8,7 @@ public:
         int day;
         int speed;
         int amount;
-        int mistakes;
+        float mistakes;
 };
 
 

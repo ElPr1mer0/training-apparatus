@@ -1,6 +1,7 @@
 #ifndef PRINT_WINDOW_LOGIC_H
 #define PRINT_WINDOW_LOGIC_H
 
+#include "qcheckbox.h"
 #include <QWidget>
 
 class QPushButton;
@@ -10,7 +11,12 @@ class TRAINING;
 class QTextBrowser;
 class QLabel;
 class SOUNDS;
-
+class QCustomPlot;
+class QCPGraph;
+class QCPItemTracer;
+class QCPCurve;
+class QGroupBox;
+class QCheckBox;
 
 
 class PRINT_WINDOW_LOGIC: public QWidget{
@@ -22,7 +28,20 @@ private:
     QPushButton *but_load_training = nullptr;
     QPushButton *but_create_training = nullptr;
     QPushButton *but_add_training = nullptr;
-    QComboBox *box_training = nullptr;
+    QPushButton *but_show_group_plot = nullptr;
+    QPushButton *but_show_word_statistic = nullptr;
+    QPushButton *but_add_file = nullptr;
+    QPushButton *but_add_word = nullptr;
+    QPushButton *but_publish_training = nullptr;
+    QPushButton *but_delete_last_word = nullptr;
+    QPushButton *but_delete_word = nullptr;
+    QPushButton *but_hide_group_plot = nullptr;
+    QPushButton *but_create_errors_training = nullptr;
+
+    QLineEdit *ld_training_name = nullptr; //доп окно create_training
+    QLineEdit *ld_add_word = nullptr;
+    QLineEdit *ld_current_symbols = nullptr;
+    QLineEdit *ld_delete_word = nullptr;
     QLineEdit *ld_game_pole = nullptr;
     QLineEdit *ld_current_mistakes = nullptr;
     QLineEdit *ld_current_speed = nullptr;
@@ -32,22 +51,36 @@ private:
     QLineEdit *ld_mistakes = nullptr;
     QLineEdit *ld_all_time = nullptr;
     QLineEdit *ld_current_min = nullptr;
-    QLineEdit *ld_current_sec = nullptr; 
-    QTextBrowser *text_browser = nullptr;
-    QLabel *lab_current_mistakes = nullptr;
+    QLineEdit *ld_current_sec = nullptr;
+    QLineEdit *ld_plot_value = nullptr;
 
-    QLineEdit *ld_training_name = nullptr; //доп окно create_training
-    QLineEdit *ld_add_word = nullptr;
-    QLineEdit *ld_current_symbols = nullptr;
-    QLineEdit *ld_delete_word = nullptr;
-    QPushButton *but_add_file = nullptr;
-    QPushButton *but_add_word = nullptr;
-    QPushButton *but_publish_training = nullptr;
-    QPushButton *but_delete_last_word = nullptr;
-    QPushButton *but_delete_word = nullptr;
-    QLabel *lab_status = nullptr;
+    QTextBrowser *text_browser = nullptr;
     QTextBrowser *browser_training_word = nullptr;
 
+    QLabel *lab_current_mistakes = nullptr;
+    QLabel *lab_status = nullptr;
+
+    QCustomPlot *plot = nullptr; // график
+    QCPItemTracer *tracer = nullptr; // для уточнения нажатия на графике
+    QCPCurve *vertical_line = nullptr;
+
+    QGroupBox *group_plot = nullptr;
+    QGroupBox *group_game_pole = nullptr;
+    QGroupBox *group_report = nullptr;
+
+    QComboBox *box_training = nullptr;
+    QComboBox *box_from_year = nullptr;
+    QComboBox *box_from_month = nullptr;
+    QComboBox *box_to_year = nullptr;
+    QComboBox *box_to_month = nullptr;
+
+    QCheckBox *chbox_amount_text = nullptr;
+    QCheckBox *chbox_speed = nullptr;
+    QCheckBox *chbox_mistake = nullptr;
+    QCheckBox *chbox_letter_errors  = nullptr;
+    QCheckBox *chbox_syllable_errors = nullptr;
+    QCheckBox *chbox_word_errors = nullptr;
+    QCheckBox *chbox_words_speed = nullptr;
 
     TRAINING *training  = nullptr;
     SOUNDS *sounds = nullptr;
@@ -71,10 +104,15 @@ private:
     int end_ms = 0; // конец отслеживания
     bool start_writing = true; //для запоминания начала
 
+    bool errors_mode = false;
+
 public:
     PRINT_WINDOW_LOGIC(QPushButton *, QPushButton *, QComboBox *, QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *,
                        QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *, QTextBrowser *,
-                       QLabel*, QPushButton *, QPushButton *);
+                       QLabel*, QPushButton *, QPushButton *, QPushButton *, QCustomPlot *, QPushButton *,QComboBox *
+                       , QComboBox *, QComboBox *, QComboBox *, QGroupBox *, QLineEdit *, QGroupBox *,QCheckBox *,
+                       QCheckBox *, QCheckBox *, QCheckBox *, QCheckBox *, QCheckBox * , QCheckBox *, QPushButton *,
+                       QGroupBox *, QPushButton *);
 
     ~PRINT_WINDOW_LOGIC();
 
@@ -87,16 +125,37 @@ private slots:
     void ButCreateTrainingClicked();
     void ButDeleteLastWordClicked();
     void ButDeleteWordClicked();
-
-    void LdFieldTextChanged(QString);
     void ButStartClicked();
     void ButLoadTrainingClicked();
+    void ButShowGroupPlotClicked();
+    void ButHideGroupPlotClicked();
+    void ButShowWordStatistic();
+    void ButCreateErrorsTrainingClicked();
+
+    void LdFieldTextChanged(QString); //освновное окно
+
     void BoxTrainingCurrentIndexChanged(int);
+    void BoxFromYearCurrentIndexChanged(int);
+    void BoxFromMonthCurrentIndexChanged(int);
+    void BoxToYearCurrentIndexChanged(int);
+    void BoxToMonthCurrentIndexChanged(int);
+
+    void PlotMousePress(QMouseEvent *);
+    void PlotMouseMove(QMouseEvent *);
+
+    void CHBoxSpeedChecked();
+    void CHBoxMistakeChecked();
+    void CHBoxAmountTextChecked();
+    void CHBoxLetterErrorsChecked();
+    void CHBoxSyllableErrorsChecked();
+    void CHBoxWordErrorsChecked();
+    void CHBoxWordsSpeedChecked();
 
     void IsWin();
     void OnTime();
     void OnPauseTime();
     void OnUpdateData();
+
 };
 
 #endif // PRINT_WINDOW_LOGIC_H

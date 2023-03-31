@@ -1,4 +1,5 @@
 #include "widget_style.h"
+#include "qcustomplot.h"
 #include <QtWidgets>
 
 
@@ -146,24 +147,25 @@ void WIDGET_STYLE::SetButBackStyle(QPushButton *but_back){
 
 
 
-
-
-
-
 void WIDGET_STYLE::SetHomeWindowStyle(QWidget *home_window){
     home_window->setWindowTitle("Хаб аристократов :)");
     home_window->setMinimumSize(1200,640);
-    home_window->setMaximumSize(10000,10000);
+    //home_window->setMaximumSize(10000,10000);
+  //  home_window->setWindowFlags(Qt::WindowMinMaxButtonsHint|Qt::WindowFullscreenButtonHint|
+    //                            Qt::WindowCloseButtonHint);
+
 
     //home_window->setStyleSheet("background-color: gray;");
 //    home_window->setStyleSheet(
 //                               "background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(79, 13, 171, 202), stop:1 rgba(169, 41, 102, 204));"
 
-//                );
+    //                );
 }
 
-
-
+void WIDGET_STYLE::SetTBHomePanelStyle(QToolBox *tb_home_panel){
+     tb_home_panel->setMinimumSize(400,200);
+     tb_home_panel->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Expanding);
+}
 
 
 
@@ -189,6 +191,143 @@ void WIDGET_STYLE::SetTextBrowserStyle(QTextBrowser *text_browser){
     text_browser->setFont(text);
 
 
+}
+
+void WIDGET_STYLE::SetPlotMistakeStyle(QCustomPlot *plot){
+    plot->setInteraction(QCP::iRangeZoom,true);   // Включаем взаимодействие удаления/приближения
+    plot->axisRect()->setRangeDrag(Qt::Horizontal);   // Включаем перетаскивание только по горизонтальной оси
+    plot->axisRect()->setRangeZoom(Qt::Horizontal);   // Включаем удаление/приближение только по горизонтальной оси
+    plot->setInteraction(QCP::iRangeDrag, true);  // Включаем взаимодействие перетаскивания графика
+
+    QSharedPointer<QCPAxisTickerDateTime> x_ticker(new QCPAxisTickerDateTime);
+    x_ticker->setDateTimeFormat("d. MMMM\nyyyy");
+    plot->xAxis->setTicker(x_ticker);
+
+    QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime); //подпись данных по X
+    dateTicker->setDateTimeFormat("d. MMMM\nyyyy");
+    plot->xAxis->setTicker(dateTicker);
+
+    QSharedPointer<QCPAxisTickerText> textTicker(new QCPAxisTickerText); //подпись данных по Y
+    for(int i = 0; i<=100; i+=5) textTicker->addTick(i, QString::number(i) + "%");
+    plot->yAxis->setTicker(textTicker);
+
+    plot->xAxis->setTickLabelFont(QFont(QFont().family(), 10)); //шрифты
+    plot->yAxis->setTickLabelFont(QFont(QFont().family(), 10));
+
+    plot->xAxis->setLabel("Дата");
+    plot->yAxis->setLabel("Ошибки %");
+
+    plot->xAxis2->setVisible(true);//настраиваю отображение данных
+    plot->yAxis2->setVisible(true);
+    plot->xAxis2->setTicks(false);
+    plot->yAxis2->setTicks(false);
+    plot->xAxis2->setTickLabels(true);
+    plot->yAxis2->setTickLabels(true);
+
+   // plot->legend->setVisible(true);  // легенда
+    plot->legend->setBrush(QColor(255, 255, 255, 150));
+
+    plot->setMinimumSize(400,400);
+}
+
+void WIDGET_STYLE::SetPlotAmountTextStyle(QCustomPlot *plot){
+    plot->setInteraction(QCP::iRangeZoom,true);   // Включаем взаимодействие удаления/приближения
+    plot->axisRect()->setRangeDrag(Qt::Horizontal);   // Включаем перетаскивание только по горизонтальной оси
+    plot->axisRect()->setRangeZoom(Qt::Horizontal);   // Включаем удаление/приближение только по горизонтальной оси
+    plot->setInteraction(QCP::iRangeDrag, true);  // Включаем взаимодействие перетаскивания графика
+
+    QSharedPointer<QCPAxisTickerDateTime> x_ticker(new QCPAxisTickerDateTime);
+    x_ticker->setDateTimeFormat("d. MMMM\nyyyy");
+    plot->xAxis->setTicker(x_ticker);
+
+    QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime); //подпись данных по X
+    dateTicker->setDateTimeFormat("d. MMMM\nyyyy");
+    plot->xAxis->setTicker(dateTicker);
+
+    QSharedPointer<QCPAxisTickerText> textTicker(new QCPAxisTickerText); //подпись данных по Y
+    for(int i = 0; i<=400; i+=20) textTicker->addTick(i, QString::number(i));
+    plot->yAxis->setTicker(textTicker);
+
+    plot->xAxis->setTickLabelFont(QFont(QFont().family(), 10)); //шрифты
+    plot->yAxis->setTickLabelFont(QFont(QFont().family(), 10));
+
+    plot->xAxis->setLabel("Дата");
+    plot->yAxis->setLabel("Кол-во текстов");
+
+    plot->xAxis2->setVisible(true);//настраиваю отображение данных
+    plot->yAxis2->setVisible(true);
+    plot->xAxis2->setTicks(false);
+    plot->yAxis2->setTicks(false);
+    plot->xAxis2->setTickLabels(true);
+    plot->yAxis2->setTickLabels(true);
+
+   // plot->legend->setVisible(true);  // легенда
+    plot->legend->setBrush(QColor(255, 255, 255, 150));
+
+    plot->setMinimumSize(400,400);
+}
+
+void WIDGET_STYLE::SetPlotSpeedStyle(QCustomPlot *plot){
+    plot->setInteraction(QCP::iRangeZoom,true);   // Включаем взаимодействие удаления/приближения
+    plot->axisRect()->setRangeDrag(Qt::Horizontal);   // Включаем перетаскивание только по горизонтальной оси
+    plot->axisRect()->setRangeZoom(Qt::Horizontal);   // Включаем удаление/приближение только по горизонтальной оси
+    plot->setInteraction(QCP::iRangeDrag, true);  // Включаем взаимодействие перетаскивания графика
+
+    QSharedPointer<QCPAxisTickerDateTime> x_ticker(new QCPAxisTickerDateTime);
+    x_ticker->setDateTimeFormat("d. MMMM\nyyyy");
+    plot->xAxis->setTicker(x_ticker);
+
+    QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime); //подпись данных по X
+    dateTicker->setDateTimeFormat("d. MMMM\nyyyy");
+    plot->xAxis->setTicker(dateTicker);
+
+    QSharedPointer<QCPAxisTickerText> textTicker(new QCPAxisTickerText); //подпись данных по Y
+    for(int i = 0; i<=1000; i+=50) textTicker->addTick(i, QString::number(i));
+    plot->yAxis->setTicker(textTicker);
+
+    plot->xAxis->setTickLabelFont(QFont(QFont().family(), 10)); //шрифты
+    plot->yAxis->setTickLabelFont(QFont(QFont().family(), 10));
+
+    plot->xAxis->setLabel("Дата");
+    plot->yAxis->setLabel("Скорость");
+
+    plot->xAxis2->setVisible(true);//настраиваю отображение данных
+    plot->yAxis2->setVisible(true);
+    plot->xAxis2->setTicks(false);
+    plot->yAxis2->setTicks(false);
+    plot->xAxis2->setTickLabels(true);
+    plot->yAxis2->setTickLabels(true);
+
+   // plot->legend->setVisible(true);  // легенда
+    plot->legend->setBrush(QColor(255, 255, 255, 150));
+
+    plot->setMinimumSize(400,400);
+}
+
+void WIDGET_STYLE::SetBoxsYearsStyle(QComboBox* box_year){
+    for(int i = 0; i<5; ++i){
+        box_year->addItem(QString::number(2019+i));
+    }
+
+}
+
+void WIDGET_STYLE::SetBoxsMonthsStyle(QComboBox* box_month){
+    box_month->addItem("Январь");
+    box_month->addItem("Февраль");
+    box_month->addItem("Март");
+    box_month->addItem("Апрель");
+    box_month->addItem("Май");
+    box_month->addItem("Июнь");
+    box_month->addItem("Июль");
+    box_month->addItem("Август");
+    box_month->addItem("Сентябрь");
+    box_month->addItem("Октябрь");
+    box_month->addItem("Ноябрь");
+    box_month->addItem("Декабрь");
+}
+
+void WIDGET_STYLE::SetGroupPlotStyle(QGroupBox *group_plot){
+    group_plot->setVisible(false);
 }
 
 void WIDGET_STYLE::SetCreateTrainingWindowStyle(QWidget *create_training_window){

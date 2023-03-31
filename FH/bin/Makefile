@@ -274,6 +274,7 @@ Makefile: ../FH.pro ../../../5.15.2/mingw81_64/mkspecs/features/spec_pre.prf \
 		../../../5.15.2/mingw81_64/mkspecs/features/lex.prf \
 		../FH.pro \
 		../../../5.15.2/mingw81_64/lib/Qt5Multimedia.prl \
+		../../../5.15.2/mingw81_64/lib/Qt5PrintSupport.prl \
 		../../../5.15.2/mingw81_64/lib/Qt5Widgets.prl \
 		../../../5.15.2/mingw81_64/lib/Qt5Gui.prl \
 		../../../5.15.2/mingw81_64/lib/Qt5Sql.prl \
@@ -487,6 +488,7 @@ Makefile: ../FH.pro ../../../5.15.2/mingw81_64/mkspecs/features/spec_pre.prf \
 ../../../5.15.2/mingw81_64/mkspecs/features/lex.prf:
 ../FH.pro:
 ../../../5.15.2/mingw81_64/lib/Qt5Multimedia.prl:
+../../../5.15.2/mingw81_64/lib/Qt5PrintSupport.prl:
 ../../../5.15.2/mingw81_64/lib/Qt5Widgets.prl:
 ../../../5.15.2/mingw81_64/lib/Qt5Gui.prl:
 ../../../5.15.2/mingw81_64/lib/Qt5Sql.prl:

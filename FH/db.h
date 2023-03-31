@@ -47,7 +47,6 @@ public:
     void LoadTrainingStatistics(const QString &, const QString &,QString &);
     void LoadTraining(const QString &,const QString &, QString &);
     void LoadAdditionalStatistics(const QString &,const QString &, QString &, const QString &);
-
     void LoadStatisticsPerTime(const QString &, const QString & , QList<CHART> &, const int &, const int & = 0, const int & = 0);
 
     void SendTrainingStatistics(const QString &, const QString &, const QString &);

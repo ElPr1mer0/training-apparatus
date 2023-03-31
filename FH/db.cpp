@@ -134,53 +134,53 @@ void DB::LoadTraining(const QString &mode_name,const QString &training_name, QSt
 }
 
 void DB::LoadAdditionalStatistics(const QString &mode_name,const QString &training_name, QString &statistics, const QString &statistics_type){
-    if(!Query("SELECT "+ statistics_type+ " FROM statistics WHERE id = "+ QString::number(user_id)+
-             " AND training_name = '"+training_name+ "' AND mode_name = '"+mode_name+"'")){
-        if(!record_exist) qDebug()<<"Статистика "+ statistics_type+ " еще не была создана!";//если запись такая уже есть
-        else{
+
+    if(Query("SELECT "+ statistics_type+ " FROM statistics WHERE id = "+ QString::number(user_id)+
+             " AND training_name = '"+training_name+ "' AND mode_name = '"+mode_name+"'")){     
             query = new QSqlQuery(*db);
             query->exec("SELECT "+ statistics_type+ " FROM statistics WHERE id = "+ QString::number(user_id)+
                         " AND training_name = '"+training_name+ "' AND mode_name = '"+mode_name+"'");
-
             while(query->next()){
                 statistics = query->value(0).toString();
             }
             qDebug()<<"Статитиска "+ statistics_type+ " загружена из базы данных!";
             delete query;
-        }
+
+        return;
+    }else{
+        if(!record_exist) qDebug()<<"Статистика "+ statistics_type+ " еще не была создана!";//если запись такая уже есть
+
     }
 }
 
 void DB::LoadStatisticsPerTime(const QString &mode_name, const QString &training_name, QList<CHART> &statistics_per_time,
                           const int &year, const int &month, const int &day){
 
-    if(Query("SELECT speed, amount, mistakes FROM statistics_per_time "
+    if(Query("SELECT * FROM statistics_per_time "
             "WHERE id = "+ QString::number(user_id)+" AND training_name = '"+ training_name +"' AND "
-            "mode_name = '"+mode_name+"' AND year = "+ QString::number(year)+" AND month = "+
-             QString::number(month)+" AND day = "+ QString::number(day))){
+            "mode_name = '"+mode_name+"' AND year = "+ QString::number(year))){
 
         if(!record_exist) qDebug()<<"За этот период ничего нет!";
         else{
             query = new QSqlQuery(*db);
-            query->exec("SELECT speed, amount, mistakes FROM statistics_per_time "
+            query->exec("SELECT * FROM statistics_per_time "
                         "WHERE id = "+ QString::number(user_id)+" AND training_name = '"+ training_name +"' AND "
-                        "mode_name = '"+mode_name+"' AND year = "+ QString::number(year)+" AND month = "+
-                        QString::number(month)+" AND day = "+ QString::number(day));
+                        "mode_name = '"+mode_name+"' AND year = "+ QString::number(year));
             while(query->next()){
                 CHART chart;
                 chart.speed = query->value("speed").toInt();
                 chart.amount = query->value("amount").toInt();
                 chart.mistakes = query->value("mistakes").toFloat();
-                chart.year = year;
-                chart.month = month;
-                chart.day = day;
+                chart.year = query->value("year").toInt();
+                chart.month = query->value("month").toInt();
+                chart.day = query->value("day").toInt();
                 statistics_per_time.append(chart);
             }
             qDebug()<<" Статистика за время загружена из базы данных!";
             delete query;
         }
     }
-
+    else qDebug()<<"Статистика еще не создана за сегодня!";
 }
 
 
@@ -238,8 +238,8 @@ void DB::SendStatisticsPerTime(const QString &mode_name, const QString &training
         if(!record_exist){
             if(query->exec("INSERT INTO statistics_per_time (id, mode_name, training_name, year, month, day, speed, amount, mistakes)"
                "VALUES ("+QString::number(user_id)+", '"+mode_name+"', '"+training_name+"', "+ QString::number(year)+", "+
-               QString::number(month)+", "+QString::number(day)+", " +QString::number(speed)+", "+QString::number(speed)+
-               +", "+QString::number(amount)+", "+QString::number(mistakes)+")")) qDebug()<<"Данные за сегодня созданы в бд!"; //если записи не было, добавляем
+               QString::number(month)+", "+QString::number(day)+", " +QString::number(speed)+", "+QString::number(amount)+
+               ", "+QString::number(mistakes)+")")) qDebug()<<"Данные за сегодня созданы в бд!"; //если записи не было, добавляем
 
             else qDebug()<<"Ошибка создания данных за сегодня!";
         }
@@ -262,6 +262,8 @@ void DB::SendStatisticsPerTime(const QString &mode_name, const QString &training
 
 bool DB::CreateCustomTraining(const QString &mode_name, const QString &training_name, const QString &content){
     query = new QSqlQuery(*db);
+    qDebug()<<"INSERT INTO mode(id, mode_name, training_name, content, people_added, play_counter)"
+              "VALUES("+QString::number(user_id)+",'"+mode_name+"','"+training_name+"','"+content+"',1,0);";
     if(query->exec("INSERT INTO mode(id, mode_name, training_name, content, people_added, play_counter)"
                    "VALUES("+QString::number(user_id)+",'"+mode_name+"','"+training_name+"','"+content+"',1,0);")){
         qDebug()<<"Тренировка сохранена успешно!";

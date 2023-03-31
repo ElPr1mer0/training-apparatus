@@ -5,6 +5,7 @@
 #include "QDate"
 #include "QDebug"
 #include <math.h>
+#include "qcustomplot.h"
 
 
 
@@ -12,7 +13,7 @@
 
 
 void TRAINING::AddErrorInConteiner(QMap<QString, int> &errors_mode, QString &mistake){
-    auto  it = errors_mode.find(mistake);//смотрим есть ли уже ошибка с этой буквой/слогом в списке
+     auto  it = errors_mode.find(mistake);//смотрим есть ли уже ошибка с этой буквой/слогом в списке
     if(it !=errors_mode.end()) ++it.value(); //если есть, то мы увеличиваем кол-во данных ошибок на 1
     else {
         errors_mode.insert(mistake, 1); //если нет, то создаем запись буквы/слога + 1 ошибка
@@ -61,7 +62,7 @@ bool TRAINING::AddTraining(){
     for(auto it = word_training_list.begin();it!=word_training_list.end();++it) content += *it+'\n';
 
     if(db->CreateCustomTraining("training", custom_training_name, content)){ //добавляем новый режим в таблицу mode
-        db->SendTrainingStatistics("training", custom_training_name,"0; 0; 0; 0; 0; 0; 0;");//создаем статистику по режиму в таблицу statistics
+        db->SendTrainingStatistics("training", custom_training_name,"0 0 0 0 0 0 0 ");//создаем статистику по режиму в таблицу statistics
         content = "";
         training_names.append(custom_training_name);//добавляем наше имя тренировки в список
 
@@ -131,27 +132,27 @@ QString TRAINING::GetTraining(const QString &training_name){
     db->LoadTraining("training",training_name, training);
 
     QString line = "", level = "";
-    int totalWordsInFile = 0;
+    int total_words_in_file = 0;
 
-    for(int i = 0; i<training.length();++i) if(training[i] == '\n')++totalWordsInFile; // подсчитали кол-во слов в уровне
+    for(int i = 0; i<training.length();++i) if(training[i] == '\n')++total_words_in_file; // подсчитали кол-во слов в уровне
 
-    if (totalWordsInFile == 0){
+    if (total_words_in_file == 0){
         qDebug()<<"Нет слов в данной тренировке!";
         return "Нет слов в данной тренировке!";
     }
 
     for(int i = 0; i<TOTAL_WORDS_PER_LEVEL;++i){ // собираем уровень из слов; TOTAL_WORDS_PER_LEVEL - максимальное кол-во слов на уровень
-        int randWord = -1;
+        int rand_word = -1;
 
-            while(randWord>totalWordsInFile || randWord<0)  randWord = rand() % totalWordsInFile + 1; // генератор рандома для слов
+            while(rand_word>total_words_in_file || rand_word<0)  rand_word = rand() % total_words_in_file + 1; // генератор рандома для слов
 
             line = "";
             int j = 0;
             int k;
 
-            while(j<randWord){
+            while(j<rand_word){
 
-                for(k = 0; j<randWord-1;++k) if(training[k] == '\n') ++j;
+                for(k = 0; j<rand_word-1;++k) if(training[k] == '\n') ++j;
 
                 for(;k<training.length();++k){
                     if(training[k] == '\n') break;
@@ -165,6 +166,8 @@ QString TRAINING::GetTraining(const QString &training_name){
     qDebug()<<"Уровень создан успешно!";
     return level;
 }
+
+
 ////////////////////////////////////////////////////////////////////////
 //////////////////////////LOAD_TRAINING/////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
@@ -260,7 +263,7 @@ void TRAINING::MistakeReader(QString current_word, int current_pos){
         if(!CheckGap(syllable) || syllable.length()<3) AddErrorInConteiner(syllable_errors,syllable); //если есть пробел, то записывать не будем
     }                                                                                           //+ слог из 3 букв
 
-    if(current_pos < current_word.length()-1 && current_pos > -1){// проверка на то, что после нашей ошибки и до можно брать буквы (когда она в середине слога)
+    if(current_pos < current_word.length()-1 && current_pos > 0){// проверка на то, что после нашей ошибки и до можно брать буквы (когда она в середине слога)
         syllable = current_word.mid(current_pos-1, 3);
         if(!CheckGap(syllable) || syllable.length()<3) AddErrorInConteiner(syllable_errors,syllable);
     }
@@ -361,6 +364,7 @@ void TRAINING::UpdateAdditionalStatistics(const QString &training_name){ //на�
     }
 }
 
+
 void TRAINING::UpdateStatisticsPerTime(const QString &training_name, const float &current_mistakes,const int &current_speed){
     bool is_update = false;
     for(auto it = statistics_per_time.begin(); it<statistics_per_time.end();++it)
@@ -390,12 +394,52 @@ void TRAINING::UpdateStatisticsPerTime(const QString &training_name, const float
         statistics_per_time.append(chart);
         qDebug()<<"Статистика за день была создана! ";
     }
-
 }
 
 void TRAINING::GetStatisticsPerTime(const QString &training_name){
-    db->LoadStatisticsPerTime("training", training_name,statistics_per_time,date->currentDate().year(),
-                              date->currentDate().month(),date->currentDate().day());
+    db->LoadStatisticsPerTime("training", training_name,statistics_per_time,2022);//date->currentDate().year() НУЖНО ИСПРАВИТЬ, ЧТОБЫ ВЫБИРАЛАСЬ ДАТА
+
+}
+
+void TRAINING::DetermineDayCoffForPlot(double &now, QVector<QCPGraphData> &graph_data , const QString &type){
+    int year = date->currentDate().year();
+    int month = date->currentDate().month();
+    int day = date->currentDate().day();
+    int day_coff; // для отображения дня на графике
+
+    for(int i = 0;i<statistics_per_time.length();++i){
+        day_coff = 0;
+
+        if((year - statistics_per_time[i].year) == 0){//одинаковый год
+
+            if (day - statistics_per_time[i].day >= 0){
+                    day_coff = (month - statistics_per_time[i].month) * 31 + (day - statistics_per_time[i].day);//получаем кол-во месяцев разницы и переводим это в дни
+            }else{ //если текущее число меньше числа из листа
+                day_coff = (month - statistics_per_time[i].month - 1) * 31 + (day + 31 - statistics_per_time[i].day);
+            }
+
+        }else{ //если разные года
+
+            if((day - statistics_per_time[i].day) >= 0){ //текущий день больше числа из списка
+                if((month - statistics_per_time[i].month) >= 0){ // текущий месяц больше месяца из списка
+                    day_coff = (year - statistics_per_time[i].year) * 365 + (month - statistics_per_time[i].month) * 31 + (day - statistics_per_time[i].day);
+                }else{ //месяц меньше
+                    day_coff = (year - statistics_per_time[i].year - 1) * 365 + (month + 12 - statistics_per_time[i].month) * 31 + (day - statistics_per_time[i].day);
+                }
+            }else{//день меньше
+                if((month - statistics_per_time[i].month) >= 0){ // текущий месяц больше месяца из списка
+                    day_coff = (year - statistics_per_time[i].year) * 365 + (month - statistics_per_time[i].month - 1) * 31 + (day + 31 - statistics_per_time[i].day);
+                }else{ //месяц меньше
+                    day_coff = (year - statistics_per_time[i].year - 1) * 365 + (month + 12 - statistics_per_time[i].month - 1) * 31 + (day + 31 - statistics_per_time[i].day);
+                }
+            }
+        }
+
+        graph_data[i].key = now - 24*3600*day_coff;
+        if(type == "Скорость") graph_data[i].value = statistics_per_time[i].speed;
+        else if (type == "Кол-во текстов") graph_data[i].value = statistics_per_time[i].amount;
+        else graph_data[i].value = statistics_per_time[i].mistakes;
+    }
 
 }
 
