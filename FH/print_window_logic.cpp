@@ -1,7 +1,8 @@
 #include "print_window_logic.h"
+#include "mode.h"
 #include "training_mode.h"
 #include "qcustomplot.h"
-#include "sounds.h"
+#include "resourse.h"
 #include "chart.h"
 #include <algorithm>
 
@@ -9,11 +10,12 @@
 #include <QtWidgets>
 
 ///////////////////////////////////////////////////////////////////////
-////////////////////////////MAIN_WINDOW/////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-// Эта функция используется для задания значений переменных при старте//
-// приложения.                                                        //
-PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_start, QPushButton *but_load_training, QComboBox *box_training,
+////////////////PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC/////////////////
+///////////////////////////////////////////////////////////////////////
+/// получает созданные виджеты и связывает их для последующей обработ-
+/// ки взаимодействий с ними на форме, соединяет слоты со сигналами
+/// этих объектов и подгружает стартовые данные по тренировке
+PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_start, QPushButton *but_load_training,QComboBox *box_mode_name, QComboBox *box_training_name,
  QLineEdit *ld_game_pole, QLineEdit *ld_current_mistakes, QLineEdit *ld_current_speed, QLineEdit *ld_text_amount,
  QLineEdit *ld_record, QLineEdit *ld_average_speed, QLineEdit *ld_mistakes, QLineEdit *ld_all_time,
  QLineEdit *ld_current_min, QLineEdit *ld_current_sec, QTextBrowser *text_browser, QLabel* lab_current_mistakes,
@@ -31,7 +33,8 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_start, QPushButton *but_
     this->but_hide_group_plot = but_hide_group_plot;
     this->but_show_word_statistic = but_show_word_statistic;
     this->but_create_errors_training = but_create_errors_training;
-    this->box_training = box_training;
+    this->box_mode_name = box_mode_name;
+    this->box_training_name = box_training_name;
     this->box_from_year = box_from_year;
     this->box_from_month = box_from_month;
     this->box_to_year = box_to_year;
@@ -63,21 +66,28 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_start, QPushButton *but_
 
     this->ld_game_pole->setEnabled(false);
     this->but_start->setEnabled(false);
-    this->box_training->clear();
+    this->box_training_name->clear();
     this->chbox_speed->setCheckState(Qt::Checked);
     this->chbox_letter_errors->setCheckState(Qt::Checked);
 
 
     sounds = new SOUNDS;
+    mode = new MODE;
+    training = new TRAINING(mode->db);
 
-    training = new TRAINING;
-    training->GetTrainingNames();   // подгружаем названия наших тренировок в box_training
-    this->box_training->addItems(training->training_names);
+    mode->GetModeNames();
+    this->box_mode_name->addItems(mode->mode_names); //загрзука названий режимов
+
+    mode->GetTrainingNames(this->box_mode_name->currentText());   // подгружаем названия наших тренировок в box_training_name_name
+    this->box_training_name->addItems(mode->training_names);//загрузка названий тренировок режима
+
+
+
 
     pause_timer = new QTimer(this); //создаем таймер для паузы
     connect (pause_timer, SIGNAL(timeout()),this, SLOT(OnPauseTime()));
 
-    connect(this->box_training,SIGNAL(currentIndexChanged(int)),this,SLOT(BoxTrainingCurrentIndexChanged(int)));
+    connect(this->box_training_name,SIGNAL(currentIndexChanged(int)),this,SLOT(BoxTrainingCurrentIndexChanged(int)));
     connect(this->box_from_year,SIGNAL(currentIndexChanged(int)),this,SLOT(BoxFromYearCurrentIndexChanged(int)));
     connect(this->box_from_month,SIGNAL(currentIndexChanged(int)),this,SLOT(BoxFromMonthCurrentIndexChanged(int)));
     connect(this->box_to_year,SIGNAL(currentIndexChanged(int)),this,SLOT(BoxToYearCurrentIndexChanged(int)));
@@ -103,19 +113,39 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_start, QPushButton *but_
     connect(this->chbox_word_errors, SIGNAL(clicked()),this, SLOT(CHBoxWordErrorsChecked()));
     connect(this->chbox_words_speed, SIGNAL(clicked()),this, SLOT(CHBoxWordsSpeedChecked()));
 
-    training->GetStatistics(this->box_training->currentText());//загружаем данные для режима в переменные
+    mode->GetStatistics(this->box_mode_name->currentText(),this->box_training_name->currentText());//загружаем данные для режима в переменные
     OnUpdateData(); //добавляем на форму
 
-    training->ClearStatisticsContainers();
-    training->UpdateStatisticsContainers(box_training->currentText());
+    mode->ClearStatisticsContainers();
+    mode->UpdateStatisticsContainers(this->box_mode_name->currentText(),this->box_training_name->currentText());
 
 }
+///////////////////////////////////////////////////////////////////////
+////////////////PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC/////////////////
+///////////////////////////////////////////////////////////////////////
 
+
+
+///////////////////////////////////////////////////////////////////////
+////////////////PRINT_WINDOW_LOGIC::~PRINT_WINDOW_LOGIC////////////////
+///////////////////////////////////////////////////////////////////////
 PRINT_WINDOW_LOGIC::~PRINT_WINDOW_LOGIC(){
     delete training;
+    delete mode;
     //?delete sounds;
 }
+///////////////////////////////////////////////////////////////////////
+////////////////PRINT_WINDOW_LOGIC::~PRINT_WINDOW_LOGIC////////////////
+///////////////////////////////////////////////////////////////////////
 
+
+
+///////////////////////////////////////////////////////////////////////
+////////////////PRINT_WINDOW_LOGIC::ButAddFileClicked//////////////////
+///////////////////////////////////////////////////////////////////////
+/// используется при создании тренировки пользователем, проверяет есть
+/// ли файл, проверяет соответствует ли текст правилу создания пользо-
+/// вательской тренировки
 void PRINT_WINDOW_LOGIC::ButAddFileClicked(){
 
     QFile file(QFileDialog::getOpenFileName(0,"Выбор файла","","*.text *.txt"));
@@ -180,7 +210,16 @@ void PRINT_WINDOW_LOGIC::ButAddFileClicked(){
     }
 
 }
+///////////////////////////////////////////////////////////////////////
+////////////////PRINT_WINDOW_LOGIC::ButAddFileClicked//////////////////
+///////////////////////////////////////////////////////////////////////
 
+
+
+///////////////////////////////////////////////////////////////////////
+////////////////PRINT_WINDOW_LOGIC::ButAddWordClicked//////////////////
+///////////////////////////////////////////////////////////////////////
+/// добавляет введенное пользователем слово в текст будущей тренировки
 void PRINT_WINDOW_LOGIC::ButAddWordClicked(){
     if(training->CheckWordForTrainingList(ld_add_word->text())){ //если слово написано правильно
         training->word_training_list.push_back(ld_add_word->text());
@@ -192,7 +231,17 @@ void PRINT_WINDOW_LOGIC::ButAddWordClicked(){
         lab_status->setText("Ошибка в слове!");
     }
 }
+///////////////////////////////////////////////////////////////////////
+////////////////PRINT_WINDOW_LOGIC::ButAddWordClicked//////////////////
+///////////////////////////////////////////////////////////////////////
 
+
+
+///////////////////////////////////////////////////////////////////////
+//////////////PRINT_WINDOW_LOGIC::ButCreateTrainingClicked/////////////
+///////////////////////////////////////////////////////////////////////
+/// создает трнировку и отправляет данные по ней в бд, если она прохо-
+/// дит проверку на соответствие всем правилами создания
 void PRINT_WINDOW_LOGIC::ButCreateTrainingClicked(){
     if(training->CheckCustomTrainingName(ld_training_name->text())){ //если имя правильное
         if(!training->word_training_list.empty()){//если не пустой
@@ -206,12 +255,12 @@ void PRINT_WINDOW_LOGIC::ButCreateTrainingClicked(){
                     browser_training_word->clear();
                     lab_status->setText("Тренировка добавлена!");
 
-                    box_training->addItem(training->training_names.last());//обновляем данные на освновной форме (выбираем новую тренировку)
-                    training->GetStatistics(training->training_names.last());
+                    box_training_name->addItem(mode->training_names.last());//обновляем данные на освновной форме (выбираем новую тренировку)
+                    mode->GetStatistics(box_mode_name->currentText(),mode->training_names.last());
                     OnUpdateData();
 
-                    training->ClearStatisticsContainers();
-                    training->UpdateStatisticsContainers(box_training->currentText());
+                    mode->ClearStatisticsContainers();
+                    mode->UpdateStatisticsContainers(box_mode_name->currentText(),box_training_name->currentText());
                 }else{
                     lab_status->setText("Ошибка сохранения тренировки!");
                 }
@@ -229,7 +278,16 @@ void PRINT_WINDOW_LOGIC::ButCreateTrainingClicked(){
         lab_status->setText("Ошибка ввода имени!");
     }
 }
+///////////////////////////////////////////////////////////////////////
+//////////////PRINT_WINDOW_LOGIC::ButCreateTrainingClicked/////////////
+///////////////////////////////////////////////////////////////////////
 
+
+
+///////////////////////////////////////////////////////////////////////
+/////////////PRINT_WINDOW_LOGIC::ButDeleteLastWordClicked//////////////
+///////////////////////////////////////////////////////////////////////
+/// удаляет последнее слово на поле
 void PRINT_WINDOW_LOGIC::ButDeleteLastWordClicked(){
     if(!training->word_training_list.empty()){//если не пусто, то удаляем последнее слово в тренировке
         lab_status->setText("Удалено: "+training->word_training_list.last());
@@ -244,7 +302,16 @@ void PRINT_WINDOW_LOGIC::ButDeleteLastWordClicked(){
         lab_status->setText("Тренировка пуста!");
     }
 }
+///////////////////////////////////////////////////////////////////////
+/////////////PRINT_WINDOW_LOGIC::ButDeleteLastWordClicked//////////////
+///////////////////////////////////////////////////////////////////////
 
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////PRINT_WINDOW_LOGIC::ButDeleteWordClicked////////////////
+///////////////////////////////////////////////////////////////////////
+/// удаляет слово по поиску
 void PRINT_WINDOW_LOGIC::ButDeleteWordClicked(){
     bool found = false;
     if(!training->word_training_list.empty()){ //если не пусто
@@ -270,7 +337,18 @@ void PRINT_WINDOW_LOGIC::ButDeleteWordClicked(){
         lab_status->setText("Тренировка пуста!");
     }
 }
+///////////////////////////////////////////////////////////////////////
+///////////////PRINT_WINDOW_LOGIC::ButDeleteWordClicked////////////////
+///////////////////////////////////////////////////////////////////////
 
+
+
+///////////////////////////////////////////////////////////////////////
+//////////////PRINT_WINDOW_LOGIC::GetCreateTrainingComponents//////////
+///////////////////////////////////////////////////////////////////////
+/// получает созданные виджеты для CreateTrainingWindow и связывает
+/// их для последующей обработки взаимодействий с ними на форме,
+/// соединяет слоты со сигналами этих объектов
 void PRINT_WINDOW_LOGIC::GetCreateTrainingComponents(QPushButton * but_delete_word, QPushButton *but_delete_last_word, QPushButton *but_add_file,
 QPushButton *but_add_word, QPushButton *but_publish_training, QLineEdit *ld_delete_word, QLineEdit *ld_training_name, QLineEdit *ld_add_word,
 QLineEdit *ld_current_symbols, QLabel *lab_status, QTextBrowser *browser_training_word){
@@ -295,20 +373,17 @@ QLineEdit *ld_current_symbols, QLabel *lab_status, QTextBrowser *browser_trainin
     connect(this->but_delete_last_word, SIGNAL(clicked()),this, SLOT(ButDeleteLastWordClicked()));
     connect(this->but_delete_word, SIGNAL(clicked()),this, SLOT(ButDeleteWordClicked()));
 }
-
-
-////////////////////////////////////////////////////////////////////////
-////////////////////////////MAIN_WINDOW/////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-
+///////////////////////////////////////////////////////////////////////
+//////////////PRINT_WINDOW_LOGIC::GetCreateTrainingComponents//////////
+///////////////////////////////////////////////////////////////////////
 
 
 
 ////////////////////////////////////////////////////////////////////////
-//////////////////ON_LINE_EDIT_FIELD_TEXT_CHANGED///////////////////////
+/////////////////PRINT_WINDOW_LOGIC::LdFieldTextChanged/////////////////
 ////////////////////////////////////////////////////////////////////////
-// Эта функция обрабатывает события изменения вводимого текста в      //
-// игровое поле в ходе игры. Проверяет на победу.                     //
+/// обрабатывает события изменения вводимого текста в поле при наборе
+/// тренировки, фиксирует ошибки, проверяет на победу.
 void PRINT_WINDOW_LOGIC::LdFieldTextChanged(QString current_word){
     if(!errors_mode){ //!errors_mode если равен true, то это режим исправления ошибок, статистику нам тут ловить не надо
         if(start_writing){
@@ -373,18 +448,35 @@ void PRINT_WINDOW_LOGIC::LdFieldTextChanged(QString current_word){
             }
     }
 }
+///////////////////////////////////////////////////////////////////////
+/////////////////PRINT_WINDOW_LOGIC::LdFieldTextChanged/////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+
+///////////////////////////////////////////////////////////////////////
+////////PRINT_WINDOW_LOGIC::BoxModeNamesCurrentIndexChanged////////////
+///////////////////////////////////////////////////////////////////////
+/// при смене режима вызывает функции обновления данных на форме и тп
+void PRINT_WINDOW_LOGIC::BoxModeNamesCurrentIndexChanged(int){
+    mode->GetStatistics(box_mode_name->currentText(),box_training_name->currentText());
+    but_start->setEnabled(true); // это если кнопка была заблочена, когда книга пройдена
+    OnUpdateData();
+
+    mode->ClearStatisticsContainers();
+    mode->UpdateStatisticsContainers(box_mode_name->currentText(),box_training_name->currentText());
+}
+///////////////////////////////////////////////////////////////////////
+////////PRINT_WINDOW_LOGIC::BoxModeNamesCurrentIndexChanged////////////
+///////////////////////////////////////////////////////////////////////
+
+
+
 ////////////////////////////////////////////////////////////////////////
-//////////////////ON_LINE_EDIT_FIELD_TEXT_CHANGED///////////////////////
+////////////////PRINT_WINDOW_LOGIC::ButStartClicked/////////////////////
 ////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-////////////////////////////////////////////////////////////////////////
-//////////////////////////ON_BUT_START_CLICKED//////////////////////////
-////////////////////////////////////////////////////////////////////////
-// Эта функция обрабатывает нажатие на кнопку старта игры             //
+/// начинает тренировку, проверяет есть ли текст в поле, обнуляет неко-
+/// торые данные и запускает таймер
 void PRINT_WINDOW_LOGIC::ButStartClicked(){
     if(text_browser->toPlainText() == ""){
         text_browser->insertPlainText("Text not Loaded");
@@ -398,7 +490,7 @@ void PRINT_WINDOW_LOGIC::ButStartClicked(){
         pause_timer->start(1000);
         but_load_training->setEnabled(false);
         but_start->setEnabled(false);
-        box_training->setEnabled(false);
+        box_training_name->setEnabled(false);
 
 
         letter = 0; // надо каждый раз сбрасывать для корректной работы считывания строки + отображения статистики
@@ -414,21 +506,32 @@ void PRINT_WINDOW_LOGIC::ButStartClicked(){
     }
 }
 ////////////////////////////////////////////////////////////////////////
-//////////////////////////ON_BUT_START_CLICKED//////////////////////////
+////////////////PRINT_WINDOW_LOGIC::ButStartClicked/////////////////////
 ////////////////////////////////////////////////////////////////////////
 
 
 
-
-
+///////////////////////////////////////////////////////////////////////
+//////////////PRINT_WINDOW_LOGIC::ButLoadTrainingClicked///////////////
+///////////////////////////////////////////////////////////////////////
+/// загружает текст выбранной тренировки в поле для старта
 void PRINT_WINDOW_LOGIC::ButLoadTrainingClicked(){
     errors_mode = false;
     text_browser->clear();
-    text_browser->insertPlainText(training->GetTraining(box_training->currentText()));
+    text_browser->insertPlainText(training->GetTraining(box_mode_name->currentText(),box_training_name->currentText()));
     edit_text = text_browser->toPlainText();
     but_start->setEnabled(true);
 }
+///////////////////////////////////////////////////////////////////////
+//////////////PRINT_WINDOW_LOGIC::ButLoadTrainingClicked///////////////
+///////////////////////////////////////////////////////////////////////
 
+
+
+///////////////////////////////////////////////////////////////////////
+////////////PRINT_WINDOW_LOGIC::ButShowGroupPlotClicked////////////////
+///////////////////////////////////////////////////////////////////////
+/// отображает график по выбранным данным
 void PRINT_WINDOW_LOGIC::ButShowGroupPlotClicked(){
     group_game_pole->setVisible(false);
     group_report->setVisible(false);
@@ -439,13 +542,13 @@ void PRINT_WINDOW_LOGIC::ButShowGroupPlotClicked(){
     QDate *date = new QDate;
 
     plot->addGraph();
-    QVector<QCPGraphData> graph_data(training->statistics_per_time.length());// помещаем наши данные для отображения:
+    QVector<QCPGraphData> graph_data(mode->statistics_per_time.length());// помещаем наши данные для отображения:
     QString type;
     if(chbox_amount_text->isChecked()) type = "Кол-во текстов";
     else if(chbox_speed->isChecked()) type = "Скорость";
     else if(chbox_mistake->isChecked()) type = "Ошибки %";
 
-    training->DetermineDayCoffForPlot(now,graph_data, type); // обрабатываем дни для графика
+    mode->DetermineDayCoffForPlot(now,graph_data, type); // обрабатываем дни для графика
 
     plot->graph(0)->data()->set(graph_data);
 
@@ -482,7 +585,16 @@ void PRINT_WINDOW_LOGIC::ButShowGroupPlotClicked(){
     plot->replot();
     delete date;
 }
+///////////////////////////////////////////////////////////////////////
+////////////PRINT_WINDOW_LOGIC::ButShowGroupPlotClicked////////////////
+///////////////////////////////////////////////////////////////////////
 
+
+
+///////////////////////////////////////////////////////////////////////
+/////////////PRINT_WINDOW_LOGIC::ButHideGroupPlotClicked///////////////
+///////////////////////////////////////////////////////////////////////
+/// убирает график с формы
 void PRINT_WINDOW_LOGIC::ButHideGroupPlotClicked(){
     group_plot->setVisible(false);
     group_report->setVisible(true);
@@ -490,7 +602,16 @@ void PRINT_WINDOW_LOGIC::ButHideGroupPlotClicked(){
     but_show_group_plot->setEnabled(true);
     delete tracer;
 }
+///////////////////////////////////////////////////////////////////////
+/////////////PRINT_WINDOW_LOGIC::ButHideGroupPlotClicked///////////////
+///////////////////////////////////////////////////////////////////////
 
+
+
+///////////////////////////////////////////////////////////////////////
+//////////////PRINT_WINDOW_LOGIC::ButShowWordStatistic/////////////////
+///////////////////////////////////////////////////////////////////////
+/// выводит статистическую информацию по тренировкам
 void PRINT_WINDOW_LOGIC::ButShowWordStatistic(){
     text_browser->clear();
     QString type;
@@ -504,31 +625,31 @@ void PRINT_WINDOW_LOGIC::ButShowWordStatistic(){
     std::vector<float> values;
 
     if(chbox_letter_errors->isChecked()){
-        training->SortBufPrintStatistics(training->letter_errors, keys, values);
+        mode->SortBufPrintStatistics(mode->letter_errors, keys, values);
 
         for(unsigned long it = 0; it<values.size(); ++it) //вывод отсортированных данных в браузер
                 text_browser->insertPlainText("Буква: "+keys[it] +"; Кол-во ошибок при написании: "+QString::number(values[it])+"\n");
     }
     else if(chbox_syllable_errors->isChecked()){
-        training->SortBufPrintStatistics(training->syllable_errors, keys, values);
+        mode->SortBufPrintStatistics(mode->syllable_errors, keys, values);
 
         for(unsigned long it = 0; it<values.size(); ++it) //вывод отсортированных данных в браузер
                 text_browser->insertPlainText("Слог: "+keys[it] +"; Кол-во ошибок при написании: "+QString::number(values[it])+"\n");
 
     }
     else if (chbox_word_errors->isChecked()){
-        training->SortBufPrintStatistics(training->word_errors, keys, values);
+        mode->SortBufPrintStatistics(mode->word_errors, keys, values);
 
         for(unsigned long it = 0; it<values.size(); ++it) //вывод отсортированных данных в браузер
             text_browser->insertPlainText("Слово: "+keys[it] +"; Кол-во ошибок при написании: "+QString::number(values[it])+"\n");
     }
     else {
         std::vector<int> values2;
-        for(auto it = training->words_speed.begin(); it!=training->words_speed.end(); ++it){ //без сортировки
+        for(auto it = mode->words_speed.begin(); it!=mode->words_speed.end(); ++it){ //без сортировки
             keys.push_back(it.key()); // записываю переменные в буферные вектора (слово)
             values.push_back(it.value());//скорость слова
          }
-        for(auto it = training->words_amount.begin(); it!=training->words_amount.end();++it) values2.push_back(it.value()); //сколько раз набирал
+        for(auto it = mode->words_amount.begin(); it!=mode->words_amount.end();++it) values2.push_back(it.value()); //сколько раз набирал
 
         for(unsigned long i = 0; i<values.size(); ++i) //сортировка буф векторов
             for(unsigned long i = 0; i<values.size()-1; ++i){
@@ -545,7 +666,16 @@ void PRINT_WINDOW_LOGIC::ButShowWordStatistic(){
             "; Средняя скорость при написании: "+QString::number(values[i])+"\n");
     }
 }
+///////////////////////////////////////////////////////////////////////
+//////////////PRINT_WINDOW_LOGIC::ButShowWordStatistic/////////////////
+///////////////////////////////////////////////////////////////////////
 
+
+
+///////////////////////////////////////////////////////////////////////
+//////////PRINT_WINDOW_LOGIC::ButCreateErrorsTrainingClicked///////////
+///////////////////////////////////////////////////////////////////////
+/// создает тренировку по ошибкам
 void PRINT_WINDOW_LOGIC::ButCreateErrorsTrainingClicked(){
     if(chbox_words_speed->isChecked()){
         qDebug()<<"Выберите режим с ошибками!";
@@ -553,78 +683,125 @@ void PRINT_WINDOW_LOGIC::ButCreateErrorsTrainingClicked(){
     }
     errors_mode = true;
     text_browser->clear();
-    if(chbox_letter_errors->isChecked()) text_browser->insertPlainText(training->GetErrorsTraining(training->letter_errors));
-    else if (chbox_syllable_errors->isChecked()) text_browser->insertPlainText(training->GetErrorsTraining(training->syllable_errors));
-    else if (chbox_word_errors->isChecked()) text_browser->insertPlainText(training->GetErrorsTraining(training->word_errors));
+    if(chbox_letter_errors->isChecked()) text_browser->insertPlainText(mode->GetErrorsTraining(mode->letter_errors));
+    else if (chbox_syllable_errors->isChecked()) text_browser->insertPlainText(mode->GetErrorsTraining(mode->syllable_errors));
+    else if (chbox_word_errors->isChecked()) text_browser->insertPlainText(mode->GetErrorsTraining(mode->word_errors));
     edit_text = text_browser->toPlainText();
     but_start->setEnabled(true);
 }
-
+///////////////////////////////////////////////////////////////////////
+//////////PRINT_WINDOW_LOGIC::ButCreateErrorsTrainingClicked///////////
+///////////////////////////////////////////////////////////////////////
 
 
 ////////////////////////////////////////////////////////////////////////
-////////////ON_COMBO_BOX_SELECT_BOOK_CURRENT_INDEX_CHANGED//////////////
+///////////PRINT_WINDOW_LOGIC::BoxTrainingCurrentIndexChanged///////////
 ////////////////////////////////////////////////////////////////////////
-// Эта функция обрабатывает событие выбора другой книги в комбо боксе //
-// и подгружает информацию о игровой книге.                           //
+/// обрабатывает событие выбора другой тренировки в комбо боксе и
+/// подгружает информацию об ошибках и статистике
 void PRINT_WINDOW_LOGIC::BoxTrainingCurrentIndexChanged(int){
-    training->GetStatistics(box_training->currentText());
+    mode->GetStatistics(box_mode_name->currentText(),box_training_name->currentText());
     but_start->setEnabled(true); // это если кнопка была заблочена, когда книга пройдена
     OnUpdateData();
 
-    training->ClearStatisticsContainers();
-    training->UpdateStatisticsContainers(box_training->currentText());
+    mode->ClearStatisticsContainers();
+    mode->UpdateStatisticsContainers(box_mode_name->currentText(),box_training_name->currentText());
 }
+////////////////////////////////////////////////////////////////////////
+///////////PRINT_WINDOW_LOGIC::BoxTrainingCurrentIndexChanged///////////
+////////////////////////////////////////////////////////////////////////
 
+
+
+///////////////////////////////////////////////////////////////////////
+//////////PRINT_WINDOW_LOGIC::BoxFromYearCurrentIndexChanged///////////
+///////////////////////////////////////////////////////////////////////
+/// проверяет корректность выбранного промежутка времени
 void PRINT_WINDOW_LOGIC::BoxFromYearCurrentIndexChanged(int index){
     if(index > box_to_year->currentIndex()){
         qDebug()<<"Значение начала промежутка не может быть больше конца!";
-        box_from_year->setCurrentIndex(training->from_year - 2019); // возвращаем значение до изменения
+        box_from_year->setCurrentIndex(mode->from_year - 2019); // возвращаем значение до изменения
         return;
     }
 
     if(box_to_month->currentIndex() < box_from_month->currentIndex()){
         box_to_month->setCurrentIndex(box_from_month->currentIndex());
-        training->to_month = training->from_month;
+        mode->to_month = mode->from_month;
 
     }
-    training->from_year = index + 2019; // + 2019, чтобы вести отчет с 2019 года
+    mode->from_year = index + 2019; // + 2019, чтобы вести отчет с 2019 года
 }
+///////////////////////////////////////////////////////////////////////
+//////////PRINT_WINDOW_LOGIC::BoxFromYearCurrentIndexChanged///////////
+///////////////////////////////////////////////////////////////////////
 
+
+
+///////////////////////////////////////////////////////////////////////
+/////////PRINT_WINDOW_LOGIC::BoxFromMonthCurrentIndexChanged///////////
+///////////////////////////////////////////////////////////////////////
+/// проверяет корректность выбранного промежутка времени
 void PRINT_WINDOW_LOGIC::BoxFromMonthCurrentIndexChanged(int index){
     if(index > box_to_month->currentIndex() && box_from_year->currentIndex() == box_to_year->currentIndex()){
         qDebug()<<"Значение начала промежутка не может быть больше конца!";
-        box_from_month->setCurrentIndex(training->from_month - 1);
+        box_from_month->setCurrentIndex(mode->from_month - 1);
         return;
     }
-    training->from_month = index + 1; // +1, чтобы вести с января
+    mode->from_month = index + 1; // +1, чтобы вести с января
 }
+///////////////////////////////////////////////////////////////////////
+/////////PRINT_WINDOW_LOGIC::BoxFromMonthCurrentIndexChanged///////////
+///////////////////////////////////////////////////////////////////////
 
+
+
+///////////////////////////////////////////////////////////////////////
+///////////PRINT_WINDOW_LOGIC::BoxToYearCurrentIndexChan///////////////
+///////////////////////////////////////////////////////////////////////
+/// проверяет корректность выбранного промежутка времени
 void PRINT_WINDOW_LOGIC::BoxToYearCurrentIndexChanged(int index){
     if(index < box_from_year->currentIndex()){
         qDebug()<<"Значение конца промежутка не может быть меньше начала!";
-        box_to_year->setCurrentIndex(training->to_year - 2019);
+        box_to_year->setCurrentIndex(mode->to_year - 2019);
         return;
     }
 
     if(box_to_month->currentIndex() < box_from_month->currentIndex()){
         box_to_month->setCurrentIndex(box_from_month->currentIndex());
-        training->to_month = training->from_month;
+        mode->to_month = mode->from_month;
 
     }
 
-    training->to_year = index + 2019;
+    mode->to_year = index + 2019;
 }
+///////////////////////////////////////////////////////////////////////
+///////////PRINT_WINDOW_LOGIC::BoxToYearCurrentIndexChan///////////////
+///////////////////////////////////////////////////////////////////////
 
+
+
+///////////////////////////////////////////////////////////////////////
+/////////PRINT_WINDOW_LOGIC::BoxToMonthCurrentIndexChanged/////////////
+///////////////////////////////////////////////////////////////////////
+/// проверяет корректность выбранного промежутка времени
 void PRINT_WINDOW_LOGIC::BoxToMonthCurrentIndexChanged(int index){
     if(index < box_from_month->currentIndex() && box_from_year->currentIndex() == box_to_year->currentIndex()){
         qDebug()<<"Значение конца промежутка не может быть меньше начала!";
-        box_to_month->setCurrentIndex(training->to_month - 1);
+        box_to_month->setCurrentIndex(mode->to_month - 1);
         return;
     }
-    training->to_month = index + 1;
+    mode->to_month = index + 1;
 }
+///////////////////////////////////////////////////////////////////////
+/////////PRINT_WINDOW_LOGIC::BoxToMonthCurrentIndexChanged/////////////
+///////////////////////////////////////////////////////////////////////
 
+
+
+///////////////////////////////////////////////////////////////////////
+//////////////////PRINT_WINDOW_LOGIC::PlotMousePress///////////////////
+///////////////////////////////////////////////////////////////////////
+/// обрабатывает нажатие мышки на графике
 void PRINT_WINDOW_LOGIC::PlotMousePress(QMouseEvent *event){
     double coordX = plot->xAxis->pixelToCoord(event->pos().x()); // Определяем координату X на графике, где был произведён клик мышью
 
@@ -648,11 +825,28 @@ void PRINT_WINDOW_LOGIC::PlotMousePress(QMouseEvent *event){
 
     delete date;
 }
+///////////////////////////////////////////////////////////////////////
+//////////////////PRINT_WINDOW_LOGIC::PlotMousePress///////////////////
+///////////////////////////////////////////////////////////////////////
 
+
+
+///////////////////////////////////////////////////////////////////////
+//////////////////PRINT_WINDOW_LOGIC::PlotMouseMove////////////////////
+///////////////////////////////////////////////////////////////////////
+/// обрабатывает движение мышки на графике
 void PRINT_WINDOW_LOGIC::PlotMouseMove(QMouseEvent *event){
     if(QApplication::mouseButtons()) PlotMousePress(event);
 }
+///////////////////////////////////////////////////////////////////////
+//////////////////PRINT_WINDOW_LOGIC::PlotMouseMove////////////////////
+///////////////////////////////////////////////////////////////////////
 
+
+
+///////////////////////////////////////////////////////////////////////
+////////////////PRINT_WINDOW_LOGIC::CHBoxSpeedChecked//////////////////
+///////////////////////////////////////////////////////////////////////
 void PRINT_WINDOW_LOGIC::CHBoxSpeedChecked(){
     chbox_speed->setCheckState(Qt::Checked);
     chbox_mistake->setCheckState(Qt::Unchecked);
@@ -661,7 +855,15 @@ void PRINT_WINDOW_LOGIC::CHBoxSpeedChecked(){
     delete tracer;
     ButShowGroupPlotClicked();
 }
+///////////////////////////////////////////////////////////////////////
+////////////////PRINT_WINDOW_LOGIC::CHBoxSpeedChecked//////////////////
+///////////////////////////////////////////////////////////////////////
 
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////PRINT_WINDOW_LOGIC::CHBoxMistakeChecked/////////////////
+///////////////////////////////////////////////////////////////////////
 void PRINT_WINDOW_LOGIC::CHBoxMistakeChecked(){
     chbox_speed->setCheckState(Qt::Unchecked);
     chbox_mistake->setCheckState(Qt::Checked);
@@ -670,7 +872,15 @@ void PRINT_WINDOW_LOGIC::CHBoxMistakeChecked(){
     delete tracer;
     ButShowGroupPlotClicked();
 }
+///////////////////////////////////////////////////////////////////////
+///////////////PRINT_WINDOW_LOGIC::CHBoxMistakeChecked/////////////////
+///////////////////////////////////////////////////////////////////////
 
+
+
+///////////////////////////////////////////////////////////////////////
+//////////////PRINT_WINDOW_LOGIC::CHBoxAmountTextChecked///////////////
+///////////////////////////////////////////////////////////////////////
 void PRINT_WINDOW_LOGIC::CHBoxAmountTextChecked(){
     chbox_speed->setCheckState(Qt::Unchecked);
     chbox_mistake->setCheckState(Qt::Unchecked);
@@ -679,47 +889,78 @@ void PRINT_WINDOW_LOGIC::CHBoxAmountTextChecked(){
     delete tracer;
     ButShowGroupPlotClicked();
 }
+///////////////////////////////////////////////////////////////////////
+//////////////PRINT_WINDOW_LOGIC::CHBoxAmountTextChecked///////////////
+///////////////////////////////////////////////////////////////////////
 
+
+
+///////////////////////////////////////////////////////////////////////
+//////////////PRINT_WINDOW_LOGIC::CHBoxLetterErrorsChecked/////////////
+///////////////////////////////////////////////////////////////////////
 void PRINT_WINDOW_LOGIC::CHBoxLetterErrorsChecked(){
     chbox_letter_errors->setCheckState(Qt::Checked);
     chbox_syllable_errors->setCheckState(Qt::Unchecked);
     chbox_word_errors->setCheckState(Qt::Unchecked);
     chbox_words_speed->setCheckState(Qt::Unchecked);
 }
+///////////////////////////////////////////////////////////////////////
+//////////////PRINT_WINDOW_LOGIC::CHBoxLetterErrorsChecked/////////////
+///////////////////////////////////////////////////////////////////////
 
+
+
+///////////////////////////////////////////////////////////////////////
+/////////////PRINT_WINDOW_LOGIC::CHBoxSyllableErrorsChecked////////////
+///////////////////////////////////////////////////////////////////////
 void PRINT_WINDOW_LOGIC::CHBoxSyllableErrorsChecked(){
     chbox_letter_errors->setCheckState(Qt::Unchecked);
     chbox_syllable_errors->setCheckState(Qt::Checked);
     chbox_word_errors->setCheckState(Qt::Unchecked);
     chbox_words_speed->setCheckState(Qt::Unchecked);
 }
+///////////////////////////////////////////////////////////////////////
+/////////////PRINT_WINDOW_LOGIC::CHBoxSyllableErrorsChecked////////////
+///////////////////////////////////////////////////////////////////////
 
+
+
+///////////////////////////////////////////////////////////////////////
+/////////////PRINT_WINDOW_LOGIC::CHBoxWordErrorsChecked////////////////
+///////////////////////////////////////////////////////////////////////
 void PRINT_WINDOW_LOGIC::CHBoxWordErrorsChecked(){
     chbox_letter_errors->setCheckState(Qt::Unchecked);
     chbox_syllable_errors->setCheckState(Qt::Unchecked);
     chbox_word_errors->setCheckState(Qt::Checked);
     chbox_words_speed->setCheckState(Qt::Unchecked);
 }
+///////////////////////////////////////////////////////////////////////
+/////////////PRINT_WINDOW_LOGIC::CHBoxWordErrorsChecked////////////////
+///////////////////////////////////////////////////////////////////////
 
+
+
+///////////////////////////////////////////////////////////////////////
+//////////////PRINT_WINDOW_LOGIC::CHBoxWordsSpeedChecked///////////////
+///////////////////////////////////////////////////////////////////////
 void PRINT_WINDOW_LOGIC::CHBoxWordsSpeedChecked(){
     chbox_letter_errors->setCheckState(Qt::Unchecked);
     chbox_syllable_errors->setCheckState(Qt::Unchecked);
     chbox_word_errors->setCheckState(Qt::Unchecked);
     chbox_words_speed->setCheckState(Qt::Checked);
 }
-////////////////////////////////////////////////////////////////////////
-////////////ON_COMBO_BOX_SELECT_BOOK_CURRENT_INDEX_CHANGED//////////////
-////////////////////////////////////////////////////////////////////////
-
-
+///////////////////////////////////////////////////////////////////////
+//////////////PRINT_WINDOW_LOGIC::CHBoxWordsSpeedChecked///////////////
+///////////////////////////////////////////////////////////////////////
 
 
 
 ////////////////////////////////////////////////////////////////////////
-///////////////////////////////ON_TIME//////////////////////////////////
+////////////////////PRINT_WINDOW_LOGIC::OnTime//////////////////////////
 ////////////////////////////////////////////////////////////////////////
-// Эта функция создана для подсчета времени нахождения в игре, при    //
-// при наборе текста, для сохранения этого в статистике.              //
+/// функция создана для подсчета времени нахождения в игре, при наборе
+/// текста, для сохранения в статистике, а также для подсчета
+/// времени написания каждого слова
 void PRINT_WINDOW_LOGIC::OnTime(){
     ms+=10;
     if(ms >= 1000){
@@ -735,17 +976,15 @@ void PRINT_WINDOW_LOGIC::OnTime(){
     end_ms = ms + sec*1000 + min*60*1000;
 }
 ////////////////////////////////////////////////////////////////////////
-///////////////////////////////ON_TIME//////////////////////////////////
+////////////////////PRINT_WINDOW_LOGIC::OnTime//////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
 
 
-
-
 ////////////////////////////////////////////////////////////////////////
-///////////////////////////ON_PAUSE_TIME////////////////////////////////
+//////////////////PRINT_WINDOW_LOGIC::OnPauseTime///////////////////////
 ////////////////////////////////////////////////////////////////////////
-// Эта функция создана для удерживания паузы длиной PAUSE перед игрой.//
+/// функция создана для удерживания паузы перед игрой
 void PRINT_WINDOW_LOGIC::OnPauseTime(){
       if(pause_time<=0){
         pause_timer->stop();
@@ -761,7 +1000,7 @@ void PRINT_WINDOW_LOGIC::OnPauseTime(){
       }
 }
 ////////////////////////////////////////////////////////////////////////
-///////////////////////////ON_PAUSE_TIME////////////////////////////////
+//////////////////PRINT_WINDOW_LOGIC::OnPauseTime///////////////////////
 ////////////////////////////////////////////////////////////////////////
 
 
@@ -769,32 +1008,31 @@ void PRINT_WINDOW_LOGIC::OnPauseTime(){
 
 
 ////////////////////////////////////////////////////////////////////////
-////////////////////////////ON_UPDATE_DATE//////////////////////////////
+/////////////////PRINT_WINDOW_LOGIC::OnUpdateData///////////////////////
 ////////////////////////////////////////////////////////////////////////
-// Функция обновляет данные после набора текста, или при загрузке     //
-// приложения.                                                        //
+/// функция обновляет данные после набора текста, или при загрузке
+/// приложения.
 void PRINT_WINDOW_LOGIC::OnUpdateData(){
-    ld_text_amount->setText(QString::number(training->text_amount)); //здесь заполняем данные для отображения на поле
-    ld_record->setText(QString::number(floor(training->record)));
-    ld_average_speed->setText(QString::number(floor(training->average_speed))+" симв/м");
-    ld_mistakes->setText(QString::number(training->mistakes)+"%");
-    ld_all_time->setText(QString::number(floor(training->play_time_hours)) + " ч; " +
-                         QString::number(floor(training->play_time_min)) + " м; "); // floor убирает остаток от числа
+    ld_text_amount->setText(QString::number(mode->text_amount)); //здесь заполняем данные для отображения на поле
+    ld_record->setText(QString::number(floor(mode->record)));
+    ld_average_speed->setText(QString::number(floor(mode->average_speed))+" симв/м");
+    ld_mistakes->setText(QString::number(mode->mistakes)+"%");
+    ld_all_time->setText(QString::number(floor(mode->play_time_hours)) + " ч; " +
+                         QString::number(floor(mode->play_time_min)) + " м; "); // floor убирает остаток от числа
 }
+////////////////////////////////////////////////////////////////////////
+/////////////////PRINT_WINDOW_LOGIC::OnUpdateData///////////////////////
+////////////////////////////////////////////////////////////////////////
+
+
+
+
 
 ////////////////////////////////////////////////////////////////////////
-////////////////////////////ON_UPDATE_DATE//////////////////////////////
+/////////////////////PRINT_WINDOW_LOGIC::IsWin//////////////////////////
 ////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////ON_WIN//////////////////////////////
-////////////////////////////////////////////////////////////////////////
-// Функция вызывается при "победе" (окончании игрового текста), для   //
-// подсчета игровых данных, их обработки и сохранения.                //
+/// функция вызывается при "победе" (окончании тренировки), для подсчета
+/// данных, их обработки и сохранения.
 void PRINT_WINDOW_LOGIC::IsWin(){
     timer->stop();
     delete timer;
@@ -813,33 +1051,33 @@ void PRINT_WINDOW_LOGIC::IsWin(){
 
     if(!errors_mode){ // если не запущен режим по работе над ошибками, то данные надо сохранить и обновить
 
-        if(average_current_speed>training->record){ // если новый рекорд
+        if(average_current_speed>mode->record){ // если новый рекорд
             sounds->Play(sounds->print_record);
-            training->record = average_current_speed;
+            mode->record = average_current_speed;
             text_browser->insertPlainText("         New record!!!           ");
         }
 
-        training->average_speed = (average_current_speed + training->text_amount*training->average_speed) / (training->text_amount+1); // средняя скорость за все время
-        training->mistakes = round(100*((round(100*ld_current_mistakes->text().toFloat()*100/(edit_text.length()-1))/100) +
-                              training->text_amount*training->mistakes)/(training->text_amount+1))/100;//среднее кол-во ошибок за все время
+        mode->average_speed = (average_current_speed + mode->text_amount*mode->average_speed) / (mode->text_amount+1); // средняя скорость за все время
+        mode->mistakes = round(100*((round(100*ld_current_mistakes->text().toFloat()*100/(edit_text.length()-1))/100) +
+                              mode->text_amount*mode->mistakes)/(mode->text_amount+1))/100;//среднее кол-во ошибок за все время
 
-        ++training->text_amount; //кол-во пройденных текстов стало больше на 1
+        ++mode->text_amount; //кол-во пройденных текстов стало больше на 1
 
-        training->play_time_min += min; //сохраняем время
-        training->play_time_sec += sec;
-        if(training->play_time_sec >= 60){
-            training->play_time_min++;
-            training->play_time_sec-=60;
+        mode->play_time_min += min; //сохраняем время
+        mode->play_time_sec += sec;
+        if(mode->play_time_sec >= 60){
+            mode->play_time_min++;
+            mode->play_time_sec-=60;
          }
-        if( training->play_time_min >= 60){
-            training->play_time_min -=60;
-            training->play_time_hours++;
+        if( mode->play_time_min >= 60){
+            mode->play_time_min -=60;
+            mode->play_time_hours++;
         }
 
         OnUpdateData();
-        training->UpdateStatistics(box_training->currentText()); // загружаем инфу в бд
-        training->UpdateAdditionalStatistics(box_training->currentText());//мы отправляем статистику ошибочных букв в бд
-        training->UpdateStatisticsPerTime(box_training->currentText(),current_mistakes,average_current_speed);
+        mode->UpdateStatistics(box_mode_name->currentText(),box_training_name->currentText()); // загружаем инфу в бд
+        mode->UpdateAdditionalStatistics(box_mode_name->currentText(),box_training_name->currentText());//мы отправляем статистику ошибочных букв в бд
+        mode->UpdateStatisticsPerTime(box_mode_name->currentText(),box_training_name->currentText(),current_mistakes,average_current_speed);
     }
 
     errors_mode = false;
@@ -847,11 +1085,11 @@ void PRINT_WINDOW_LOGIC::IsWin(){
     ld_game_pole->setEnabled(false);
     ld_game_pole->clear();
     group_report->setEnabled(true);
-    box_training->setEnabled(true);
+    box_training_name->setEnabled(true);
     but_load_training->setEnabled(true);
     text_browser->clear();
 }
 ////////////////////////////////////////////////////////////////////////
-////////////////////////////////////ON_WIN//////////////////////////////
+/////////////////////PRINT_WINDOW_LOGIC::IsWin//////////////////////////
 ////////////////////////////////////////////////////////////////////////
 

@@ -4,13 +4,15 @@
 #include "qcheckbox.h"
 #include <QWidget>
 
+class TRAINING;
+class MODE;
+class SOUNDS;
+
 class QPushButton;
 class QLineEdit;
 class QComboBox;
-class TRAINING;
 class QTextBrowser;
 class QLabel;
-class SOUNDS;
 class QCustomPlot;
 class QCPGraph;
 class QCPItemTracer;
@@ -68,7 +70,8 @@ private:
     QGroupBox *group_game_pole = nullptr;
     QGroupBox *group_report = nullptr;
 
-    QComboBox *box_training = nullptr;
+    QComboBox *box_training_name = nullptr;
+    QComboBox *box_mode_name = nullptr;
     QComboBox *box_from_year = nullptr;
     QComboBox *box_from_month = nullptr;
     QComboBox *box_to_year = nullptr;
@@ -82,6 +85,7 @@ private:
     QCheckBox *chbox_word_errors = nullptr;
     QCheckBox *chbox_words_speed = nullptr;
 
+    MODE *mode = nullptr;
     TRAINING *training  = nullptr;
     SOUNDS *sounds = nullptr;
 
@@ -107,7 +111,7 @@ private:
     bool errors_mode = false;
 
 public:
-    PRINT_WINDOW_LOGIC(QPushButton *, QPushButton *, QComboBox *, QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *,
+    PRINT_WINDOW_LOGIC(QPushButton *, QPushButton *,QComboBox *, QComboBox *, QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *,
                        QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *, QTextBrowser *,
                        QLabel*, QPushButton *, QPushButton *, QPushButton *, QCustomPlot *, QPushButton *,QComboBox *
                        , QComboBox *, QComboBox *, QComboBox *, QGroupBox *, QLineEdit *, QGroupBox *,QCheckBox *,
@@ -134,6 +138,7 @@ private slots:
 
     void LdFieldTextChanged(QString); //освновное окно
 
+    void BoxModeNamesCurrentIndexChanged(int);
     void BoxTrainingCurrentIndexChanged(int);
     void BoxFromYearCurrentIndexChanged(int);
     void BoxFromMonthCurrentIndexChanged(int);

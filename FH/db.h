@@ -43,7 +43,8 @@ public:
     /////////////////////////////////////////////////////////////////////////////
     ////////////////PRINT_WINDOW(training_mode)//////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////
-    void LoadTrainingNames(const QString &, QString &);
+    void LoadModeNames(QList<QString> &mode_names);
+    void LoadTrainingNames(const QString &mode_name, QList<QString> &training_names);
     void LoadTrainingStatistics(const QString &, const QString &,QString &);
     void LoadTraining(const QString &,const QString &, QString &);
     void LoadAdditionalStatistics(const QString &,const QString &, QString &, const QString &);

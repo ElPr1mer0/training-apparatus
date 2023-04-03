@@ -17,7 +17,7 @@ public:
     void AddMessageToField(const QString &message, const QString &time, int server = 0);
 private:
     void AddMessageToHistory(QLabel *message_container);
-    void SetMessageContanierStyle(QLabel *message_contaier);
+    void SetMessageContainerStyle(QLabel *message_contaier);
 };
 
 #endif // CHAT_H

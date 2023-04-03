@@ -13,10 +13,11 @@ SOURCES += \
     chat.cpp \
     db.cpp \
     main.cpp \
+    mode.cpp \
     print_window_logic.cpp \
     qcustomplot.cpp \
     reaction_speed_logic.cpp \
-    sounds.cpp \
+    resourse.cpp \
     training_mode.cpp \
     widget_style.cpp \
     hash.cpp \
@@ -27,10 +28,11 @@ HEADERS += \
     chart.h \
     chat.h \
     db.h \
+    mode.h \
     print_window_logic.h \
     qcustomplot.h \
     reaction_speed_logic.h \
-    sounds.h \
+    resourse.h \
     training_mode.h \
     widget_style.h \
     hash.h \
@@ -43,4 +45,4 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
-    sounds.qrc
+    resourse.qrc

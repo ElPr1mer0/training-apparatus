@@ -282,7 +282,7 @@ Makefile: ../FH.pro ../../../5.15.2/mingw81_64/mkspecs/features/spec_pre.prf \
 		../../../5.15.2/mingw81_64/lib/Qt5Core.prl \
 		../../../5.15.2/mingw81_64/lib/qtmain.prl \
 		../../../5.15.2/mingw81_64/mkspecs/features/build_pass.prf \
-		../sounds.qrc
+		../resourse.qrc
 	$(QMAKE) -o Makefile ..\FH.pro -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug"
 ../../../5.15.2/mingw81_64/mkspecs/features/spec_pre.prf:
 ../../../5.15.2/mingw81_64/mkspecs/qdevice.pri:
@@ -496,7 +496,7 @@ Makefile: ../FH.pro ../../../5.15.2/mingw81_64/mkspecs/features/spec_pre.prf \
 ../../../5.15.2/mingw81_64/lib/Qt5Core.prl:
 ../../../5.15.2/mingw81_64/lib/qtmain.prl:
 ../../../5.15.2/mingw81_64/mkspecs/features/build_pass.prf:
-../sounds.qrc:
+../resourse.qrc:
 qmake: FORCE
 	@$(QMAKE) -o Makefile ..\FH.pro -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug"
 
