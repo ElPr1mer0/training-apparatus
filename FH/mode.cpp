@@ -212,7 +212,9 @@ void MODE::UpdateStatistics(const QString &mode_name, const QString &training_na
 ////////////////////////////////////////////////////////////////////////
 /////////////////////////MODE::GetStatistics////////////////////////////
 ////////////////////////////////////////////////////////////////////////
-/// получает краткую статистику по набору из бд
+/// получает краткую статистику по набору из бд если она существует,
+/// если произошла ошибка при загрузке статистики или если ее не сущест-
+/// вует, то перемененные обнуляется, так как они отображаются на форме
 void MODE::GetStatistics(const QString &mode_name, const QString &training_name){
 
     QString statistics;
@@ -239,7 +241,14 @@ void MODE::GetStatistics(const QString &mode_name, const QString &training_name)
         }
     }
     else{
-        qDebug()<<"Статистика не загружана!";
+        qDebug()<<"Статистика не загружана!"; // при ошибке загрузки статистики или если ее еще не существует, то обнуляем все поля
+        this->record = 0;
+        this->average_speed = 0;
+        this->mistakes = 0;
+        this->play_time_hours = 0;
+        this->play_time_min = 0;
+        this->text_amount = 0;
+        this->play_time_sec = 0;
         return;
     }
 

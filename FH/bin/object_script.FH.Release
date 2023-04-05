@@ -7,6 +7,7 @@ release/qcustomplot.o
 release/reaction_speed_logic.o
 release/resourse.o
 release/training_mode.o
+release/voice_acting_mode.o
 release/widget_style.o
 release/hash.o
 release/window_forms.o
@@ -17,6 +18,7 @@ release/moc_db.o
 release/moc_print_window_logic.o
 release/moc_qcustomplot.o
 release/moc_reaction_speed_logic.o
+release/moc_voice_acting_mode.o
 release/moc_widget_style.o
 release/moc_window_forms.o
 release/moc_client.o

@@ -4,7 +4,7 @@
 ////////////////////////////////////////////////////////////////////////
 /////////////////////////TRAINING::TRAINING/////////////////////////////
 ////////////////////////////////////////////////////////////////////////
-TRAINING::TRAINING(DB *db):db(db){}
+TRAINING_MODE::TRAINING_MODE(DB *db):db(db){}
 ////////////////////////////////////////////////////////////////////////
 /////////////////////////TRAINING::TRAINING/////////////////////////////
 ////////////////////////////////////////////////////////////////////////
@@ -15,7 +15,7 @@ TRAINING::TRAINING(DB *db):db(db){}
 ////////////////////////TRAINING::AddTraining///////////////////////////
 ////////////////////////////////////////////////////////////////////////
 /// отправляет в бд созданную пользователем тренировку и данные по ней
-bool TRAINING::AddTraining(){
+bool TRAINING_MODE::AddTraining(){
     QString content = "";
     for(auto it = word_training_list.begin();it!=word_training_list.end();++it) content += *it+'\n';
 
@@ -42,7 +42,7 @@ bool TRAINING::AddTraining(){
 //////////////////////TRAINING::GetTraining/////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 /// создает тренировку по режиму
-QString TRAINING::GetTraining(const QString &mode_name, const QString &training_name){
+QString TRAINING_MODE::GetTraining(const QString &mode_name, const QString &training_name){
     QString training;
     db->LoadTraining(mode_name,training_name, training);
 
@@ -91,7 +91,7 @@ QString TRAINING::GetTraining(const QString &mode_name, const QString &training_
 //////////////////TRAINING::CheckWordForTrainingList////////////////////
 ////////////////////////////////////////////////////////////////////////
 /// проверяет корректность слова при создании тренировки пользователем
-bool TRAINING::CheckWordForTrainingList(const QString &word){
+bool TRAINING_MODE::CheckWordForTrainingList(const QString &word){
     if(word == ""){
         qDebug()<<"Введите слово!";
         return false;
@@ -122,7 +122,7 @@ bool TRAINING::CheckWordForTrainingList(const QString &word){
 ////////////////////////////////////////////////////////////////////////
 /// проверяет правильность введенного названии тренировки, когда ее
 /// создает пользователь
-bool TRAINING::CheckCustomTrainingName(const QString &training_name){
+bool TRAINING_MODE::CheckCustomTrainingName(const QString &training_name){
     if(training_name == ""){
         qDebug()<<"Введите имя тренировки!";
         return false;

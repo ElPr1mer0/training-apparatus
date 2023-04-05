@@ -147,9 +147,6 @@ void DB::GetUserId(const QString &login){
 /// выдает имена тренировок по режиму
 void DB::LoadTrainingNames(const QString &mode_name, QList<QString> &training_names){
     query = new QSqlQuery(*db);
-    qDebug()<<"SELECT training_names FROM added_mods "
-              "WHERE id = " + QString::number(user_id)+" AND "
-              "mode_name = '"+mode_name+"'";
     if(query->exec("SELECT training_names FROM added_mods "
                    "WHERE id = " + QString::number(user_id)+" AND "
                    "mode_name = '"+mode_name+"'")){

@@ -6,7 +6,7 @@
 
 #define SYMBOLS_LIMIT 10000
 
-class TRAINING:public MODE{
+class TRAINING_MODE: public MODE{
 
 public:
     QList <QString>word_training_list; // для создания своей тренировки в training_mode
@@ -16,7 +16,7 @@ public:
 private:
     DB *db = nullptr;
 public:
-    TRAINING(DB *db);
+    TRAINING_MODE(DB *db);
     bool AddTraining(); //оставить, добавляет данные, по новой, только что созданной тренировке
     QString GetTraining(const QString &mode_name, const QString &training_name); // оставить
 

@@ -7,6 +7,7 @@ debug/qcustomplot.o
 debug/reaction_speed_logic.o
 debug/resourse.o
 debug/training_mode.o
+debug/voice_acting_mode.o
 debug/widget_style.o
 debug/hash.o
 debug/window_forms.o
@@ -17,6 +18,7 @@ debug/moc_db.o
 debug/moc_print_window_logic.o
 debug/moc_qcustomplot.o
 debug/moc_reaction_speed_logic.o
+debug/moc_voice_acting_mode.o
 debug/moc_widget_style.o
 debug/moc_window_forms.o
 debug/moc_client.o

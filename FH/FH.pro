@@ -1,4 +1,4 @@
-QT       += core gui sql multimedia printsupport
+QT       += core gui sql multimedia printsupport texttospeech
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -19,6 +19,7 @@ SOURCES += \
     reaction_speed_logic.cpp \
     resourse.cpp \
     training_mode.cpp \
+    voice_acting_mode.cpp \
     widget_style.cpp \
     hash.cpp \
     window_forms.cpp\
@@ -34,6 +35,7 @@ HEADERS += \
     reaction_speed_logic.h \
     resourse.h \
     training_mode.h \
+    voice_acting_mode.h \
     widget_style.h \
     hash.h \
     window_forms.h\

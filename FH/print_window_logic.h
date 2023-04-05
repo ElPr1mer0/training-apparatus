@@ -4,9 +4,10 @@
 #include "qcheckbox.h"
 #include <QWidget>
 
-class TRAINING;
+class TRAINING_MODE;
 class MODE;
 class SOUNDS;
+class VOICE_ACTING_MODE;
 
 class QPushButton;
 class QLineEdit;
@@ -25,7 +26,7 @@ class PRINT_WINDOW_LOGIC: public QWidget{
     Q_OBJECT
 
 private:
-
+    QPushButton *but_voice_settings = nullptr;
     QPushButton *but_start = nullptr; // в освновном окне print_window
     QPushButton *but_load_training = nullptr;
     QPushButton *but_create_training = nullptr;
@@ -77,6 +78,7 @@ private:
     QComboBox *box_to_year = nullptr;
     QComboBox *box_to_month = nullptr;
 
+  //  QCheckBox *chbox_use_texts_from_other_modes = nullptr;
     QCheckBox *chbox_amount_text = nullptr;
     QCheckBox *chbox_speed = nullptr;
     QCheckBox *chbox_mistake = nullptr;
@@ -85,8 +87,11 @@ private:
     QCheckBox *chbox_word_errors = nullptr;
     QCheckBox *chbox_words_speed = nullptr;
 
+  //  QLabel *lab_use_question = nullptr;
+
     MODE *mode = nullptr;
-    TRAINING *training  = nullptr;
+    TRAINING_MODE *training_mode  = nullptr;
+    VOICE_ACTING_MODE *voice_acting_mode = nullptr;
     SOUNDS *sounds = nullptr;
 
     QTimer *timer = nullptr; // для работы таймера
@@ -111,10 +116,10 @@ private:
     bool errors_mode = false;
 
 public:
-    PRINT_WINDOW_LOGIC(QPushButton *, QPushButton *,QComboBox *, QComboBox *, QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *,
+    PRINT_WINDOW_LOGIC(QPushButton *,QPushButton *, QPushButton *,QComboBox *, QComboBox *, QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *,
                        QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *, QTextBrowser *,
-                       QLabel*, QPushButton *, QPushButton *, QPushButton *, QCustomPlot *, QPushButton *,QComboBox *
-                       , QComboBox *, QComboBox *, QComboBox *, QGroupBox *, QLineEdit *, QGroupBox *,QCheckBox *,
+                       QLabel*, QPushButton *, QPushButton *, QPushButton *, QCustomPlot *, QPushButton *,QComboBox *,
+                       QComboBox *, QComboBox *, QComboBox *, QGroupBox *, QLineEdit *, QGroupBox *, QCheckBox *,
                        QCheckBox *, QCheckBox *, QCheckBox *, QCheckBox *, QCheckBox * , QCheckBox *, QPushButton *,
                        QGroupBox *, QPushButton *);
 
@@ -129,14 +134,17 @@ private slots:
     void ButCreateTrainingClicked();
     void ButDeleteLastWordClicked();
     void ButDeleteWordClicked();
-    void ButStartClicked();
+
+
+    void ButStartClicked(); //освновное окно
     void ButLoadTrainingClicked();
     void ButShowGroupPlotClicked();
     void ButHideGroupPlotClicked();
     void ButShowWordStatistic();
     void ButCreateErrorsTrainingClicked();
+    void ButVoiceSettingsClicked();
 
-    void LdFieldTextChanged(QString); //освновное окно
+    void LdFieldTextChanged(QString);
 
     void BoxModeNamesCurrentIndexChanged(int);
     void BoxTrainingCurrentIndexChanged(int);
@@ -148,6 +156,7 @@ private slots:
     void PlotMousePress(QMouseEvent *);
     void PlotMouseMove(QMouseEvent *);
 
+    void CHBoxUseTextsFromOtherModesChecked();
     void CHBoxSpeedChecked();
     void CHBoxMistakeChecked();
     void CHBoxAmountTextChecked();

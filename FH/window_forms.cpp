@@ -311,6 +311,14 @@ void WINDOWS::SetPrintWindow(){
     ///////////////////////////RIGHT_LAYOUT/////////////////////
     QVBoxLayout *v_right_l = new QVBoxLayout;
     h_main_print_l->addLayout(v_right_l);
+   // QHBoxLayout *h_use_question_l = new QHBoxLayout;
+  //  v_right_l->addLayout(h_use_question_l);
+   // QCheckBox *chbox_use_texts_from_other_modes = new QCheckBox;
+   // h_use_question_l->addWidget(chbox_use_texts_from_other_modes);
+   // QLabel *lab_use_question = new QLabel("Использовать тренировки из других модов?");
+    //h_use_question_l->addWidget(lab_use_question);
+    QPushButton *but_voice_settings = new QPushButton("Настройка озвучки");
+    v_right_l->addWidget(but_voice_settings);
     QComboBox *box_mode_name = new QComboBox;
     v_right_l->addWidget(box_mode_name);
     QComboBox *box_training_name = new QComboBox;
@@ -377,12 +385,12 @@ void WINDOWS::SetPrintWindow(){
     my_style->SetPlotSpeedStyle(plot);
     my_style->SetGroupPlotStyle(group_plot);
 
-    print_window_logic = new PRINT_WINDOW_LOGIC(but_start, but_load_training,box_mode_name,box_training_name, ld_game_pole, ld_current_mistakes,
+    print_window_logic = new PRINT_WINDOW_LOGIC(but_voice_settings,but_start, but_load_training,box_mode_name,box_training_name, ld_game_pole, ld_current_mistakes,
     ld_current_speed, ld_text_amount, ld_record, ld_average_speed,  ld_mistakes, ld_all_time, ld_current_min, ld_current_sec,
     text_browser, lab_current_mistakes, but_create_training, but_add_training, but_show_plot, plot, but_hide_group_plot, box_from_year,
-    box_from_month, box_to_year, box_to_month, group_plot, ld_plot_value, group_game_pole, chbox_amount_text, chbox_speed, chbox_mistake,
-    chbox_letter_errors, chbox_syllable_errors, chbox_word_errors, chbox_words_speed, but_show_word_statistic, group_report,
-    but_create_errors_training); //здесь мы передаем объекты в класс осуществляющий взаимодействие с пользователем
+    box_from_month, box_to_year, box_to_month, group_plot, ld_plot_value, group_game_pole,chbox_amount_text,
+    chbox_speed, chbox_mistake, chbox_letter_errors, chbox_syllable_errors, chbox_word_errors, chbox_words_speed, but_show_word_statistic,
+    group_report, but_create_errors_training); //здесь мы передаем объекты в класс осуществляющий взаимодействие с пользователем
 
     print_form->setLayout(h_main_print_l);
     print_form->show();

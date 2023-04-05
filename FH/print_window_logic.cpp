@@ -1,6 +1,7 @@
 #include "print_window_logic.h"
 #include "mode.h"
 #include "training_mode.h"
+#include "voice_acting_mode.h"
 #include "qcustomplot.h"
 #include "resourse.h"
 #include "chart.h"
@@ -15,7 +16,7 @@
 /// получает созданные виджеты и связывает их для последующей обработ-
 /// ки взаимодействий с ними на форме, соединяет слоты со сигналами
 /// этих объектов и подгружает стартовые данные по тренировке
-PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_start, QPushButton *but_load_training,QComboBox *box_mode_name, QComboBox *box_training_name,
+PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_voice_settings,QPushButton *but_start, QPushButton *but_load_training,QComboBox *box_mode_name, QComboBox *box_training_name,
  QLineEdit *ld_game_pole, QLineEdit *ld_current_mistakes, QLineEdit *ld_current_speed, QLineEdit *ld_text_amount,
  QLineEdit *ld_record, QLineEdit *ld_average_speed, QLineEdit *ld_mistakes, QLineEdit *ld_all_time,
  QLineEdit *ld_current_min, QLineEdit *ld_current_sec, QTextBrowser *text_browser, QLabel* lab_current_mistakes,
@@ -25,6 +26,7 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_start, QPushButton *but_
  QCheckBox *chbox_amount_text, QCheckBox *chbox_speed, QCheckBox *chbox_mistake, QCheckBox *chbox_letter_errors,
  QCheckBox *chbox_syllable_errors, QCheckBox *chbox_word_errors , QCheckBox *chbox_words_speed,
  QPushButton *but_show_word_statistic, QGroupBox *group_report, QPushButton *but_create_errors_training){
+    this->but_voice_settings = but_voice_settings;
     this->but_start = but_start;
     this->but_load_training = but_load_training;
     this->but_create_training = but_create_training;
@@ -33,12 +35,14 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_start, QPushButton *but_
     this->but_hide_group_plot = but_hide_group_plot;
     this->but_show_word_statistic = but_show_word_statistic;
     this->but_create_errors_training = but_create_errors_training;
+
     this->box_mode_name = box_mode_name;
     this->box_training_name = box_training_name;
     this->box_from_year = box_from_year;
     this->box_from_month = box_from_month;
     this->box_to_year = box_to_year;
     this->box_to_month = box_to_month;
+
     this->ld_game_pole = ld_game_pole;
     this->ld_current_mistakes = ld_current_mistakes;
     this->ld_current_speed = ld_current_speed;
@@ -50,12 +54,20 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_start, QPushButton *but_
     this->ld_current_min = ld_current_min;
     this->ld_current_sec = ld_current_sec;
     this->ld_plot_value  = ld_plot_value;
+
     this->text_browser = text_browser;
+
     this->lab_current_mistakes = lab_current_mistakes;
+
     this->plot = plot;
+
     this->group_plot = group_plot;
     this->group_game_pole = group_game_pole;
     this->group_report = group_report;
+
+    //this->lab_use_question = lab_use_question;
+
+    //this->chbox_use_texts_from_other_modes = chbox_use_texts_from_other_modes;
     this->chbox_amount_text = chbox_amount_text;
     this->chbox_mistake = chbox_mistake;
     this->chbox_speed = chbox_speed;
@@ -69,11 +81,14 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_start, QPushButton *but_
     this->box_training_name->clear();
     this->chbox_speed->setCheckState(Qt::Checked);
     this->chbox_letter_errors->setCheckState(Qt::Checked);
+    //this->chbox_use_texts_from_other_modes->setVisible(false);
+    //this->lab_use_question->setVisible(false);
 
 
     sounds = new SOUNDS;
     mode = new MODE;
-    training = new TRAINING(mode->db);
+    training_mode = new TRAINING_MODE(mode->db);
+    voice_acting_mode = new VOICE_ACTING_MODE(this->text_browser,mode->db);
 
     mode->GetModeNames();
     this->box_mode_name->addItems(mode->mode_names); //загрзука названий режимов
@@ -88,11 +103,15 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_start, QPushButton *but_
     connect (pause_timer, SIGNAL(timeout()),this, SLOT(OnPauseTime()));
 
     connect(this->box_training_name,SIGNAL(currentIndexChanged(int)),this,SLOT(BoxTrainingCurrentIndexChanged(int)));
+    connect(this->box_mode_name,SIGNAL(currentIndexChanged(int)),this,SLOT(BoxModeNamesCurrentIndexChanged(int)));
+
     connect(this->box_from_year,SIGNAL(currentIndexChanged(int)),this,SLOT(BoxFromYearCurrentIndexChanged(int)));
     connect(this->box_from_month,SIGNAL(currentIndexChanged(int)),this,SLOT(BoxFromMonthCurrentIndexChanged(int)));
     connect(this->box_to_year,SIGNAL(currentIndexChanged(int)),this,SLOT(BoxToYearCurrentIndexChanged(int)));
     connect(this->box_to_month,SIGNAL(currentIndexChanged(int)),this,SLOT(BoxToMonthCurrentIndexChanged(int)));
 
+
+    connect(this->but_voice_settings, SIGNAL(clicked()),voice_acting_mode,SLOT(SetVoiceSettingsWindow()));
     connect(this->but_load_training, SIGNAL(clicked()),this,SLOT(ButLoadTrainingClicked()));
     connect(this->but_start, SIGNAL(clicked()),this, SLOT(ButStartClicked()));
     connect(this->but_show_group_plot, SIGNAL(clicked()),this,SLOT(ButShowGroupPlotClicked()));
@@ -105,6 +124,7 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_start, QPushButton *but_
     connect(this->plot, &QCustomPlot::mousePress, this, &PRINT_WINDOW_LOGIC::PlotMousePress);
     connect(this->plot, &QCustomPlot::mouseMove, this, &PRINT_WINDOW_LOGIC::PlotMouseMove);
 
+    //connect(this->chbox_use_texts_from_other_modes, SIGNAL(clicked()),this, SLOT(CHBoxUseTextsFromOtherModesChecked()));
     connect(this->chbox_amount_text, SIGNAL(clicked()),this, SLOT(CHBoxAmountTextChecked()));
     connect(this->chbox_speed, SIGNAL(clicked()),this, SLOT(CHBoxSpeedChecked()));
     connect(this->chbox_mistake, SIGNAL(clicked()),this, SLOT(CHBoxMistakeChecked()));
@@ -130,7 +150,7 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_start, QPushButton *but_
 ////////////////PRINT_WINDOW_LOGIC::~PRINT_WINDOW_LOGIC////////////////
 ///////////////////////////////////////////////////////////////////////
 PRINT_WINDOW_LOGIC::~PRINT_WINDOW_LOGIC(){
-    delete training;
+    delete training_mode;
     delete mode;
     //?delete sounds;
 }
@@ -170,7 +190,7 @@ void PRINT_WINDOW_LOGIC::ButAddFileClicked(){
             lab_status->setText("Кол-во символов больше ограничения!");
             return;
         }
-        if(training->symbols_counter + content.length() >SYMBOLS_LIMIT){
+        if(training_mode->symbols_counter + content.length() >SYMBOLS_LIMIT){
             lab_status->setText("Лимит будет превышен, слова не добавлены!");
             return;
         }
@@ -184,14 +204,14 @@ void PRINT_WINDOW_LOGIC::ButAddFileClicked(){
                 return;
             }
             if(content[i] == '\n' && word.length()>1){//если встретили enter и слово не пустое, то добавляем слово в тренировку
-                training->symbols_counter +=word.length(); //увеличиваем кол-во символов до удаления последнего символа chop(1), так как потом прибавил \n
+                training_mode->symbols_counter +=word.length(); //увеличиваем кол-во символов до удаления последнего символа chop(1), так как потом прибавил \n
                 word.chop(1);//удаляем символ enter для того, чтобы в browser не записался лишний enter
-                training->word_training_list.push_back(word);
+                training_mode->word_training_list.push_back(word);
                 word ="";
             }else{
                 if(i == content.length()-1 && word.length()>1){//случай, если после последнего слова в файле не поставили enter
-                    training->word_training_list.push_back(word);
-                    training->symbols_counter +=word.length()+1; //увеличиваем кол-во символов
+                    training_mode->word_training_list.push_back(word);
+                    training_mode->symbols_counter +=word.length()+1; //увеличиваем кол-во символов
                     word ="";
                 }
                 if(content[i] =='\n' && word.length() <= 1){
@@ -200,10 +220,10 @@ void PRINT_WINDOW_LOGIC::ButAddFileClicked(){
                 }
             }
         }
-        ld_current_symbols->setText(QString::number(training->symbols_counter)); // записываем текущее кол-во символов
+        ld_current_symbols->setText(QString::number(training_mode->symbols_counter)); // записываем текущее кол-во символов
         lab_status->setText("Файл считан успешно!");
 
-        for(auto it : training->word_training_list) browser_training_word->append(it); //добавляем наши слова на браузер
+        for(auto it : training_mode->word_training_list) browser_training_word->append(it); //добавляем наши слова на браузер
     }
     else{
         lab_status->setText("Ошибка открытия файла!");
@@ -221,10 +241,10 @@ void PRINT_WINDOW_LOGIC::ButAddFileClicked(){
 ///////////////////////////////////////////////////////////////////////
 /// добавляет введенное пользователем слово в текст будущей тренировки
 void PRINT_WINDOW_LOGIC::ButAddWordClicked(){
-    if(training->CheckWordForTrainingList(ld_add_word->text())){ //если слово написано правильно
-        training->word_training_list.push_back(ld_add_word->text());
+    if(training_mode->CheckWordForTrainingList(ld_add_word->text())){ //если слово написано правильно
+        training_mode->word_training_list.push_back(ld_add_word->text());
         lab_status->setText("Слово добавлено!");
-        ld_current_symbols->setText(QString::number(training->symbols_counter));
+        ld_current_symbols->setText(QString::number(training_mode->symbols_counter));
         browser_training_word->append(ld_add_word->text());
         ld_add_word->clear();
     }else{
@@ -243,15 +263,15 @@ void PRINT_WINDOW_LOGIC::ButAddWordClicked(){
 /// создает трнировку и отправляет данные по ней в бд, если она прохо-
 /// дит проверку на соответствие всем правилами создания
 void PRINT_WINDOW_LOGIC::ButCreateTrainingClicked(){
-    if(training->CheckCustomTrainingName(ld_training_name->text())){ //если имя правильное
-        if(!training->word_training_list.empty()){//если не пустой
-            if(training->symbols_counter <= SYMBOLS_LIMIT){ //если не превышен лимит символов
-                if(training->AddTraining()){                    
+    if(training_mode->CheckCustomTrainingName(ld_training_name->text())){ //если имя правильное
+        if(!training_mode->word_training_list.empty()){//если не пустой
+            if(training_mode->symbols_counter <= SYMBOLS_LIMIT){ //если не превышен лимит символов
+                if(training_mode->AddTraining()){
                     ld_current_symbols->setText("0"); //очищаем поля в доп форме и переменные для создания тренировки
                     ld_training_name->clear();
                     ld_add_word->clear();
-                    training->symbols_counter = 0;
-                    training->word_training_list.clear(); //удаляем, так как нам уже не нужно его запоминать после создания тренировки
+                    training_mode->symbols_counter = 0;
+                    training_mode->word_training_list.clear(); //удаляем, так как нам уже не нужно его запоминать после создания тренировки
                     browser_training_word->clear();
                     lab_status->setText("Тренировка добавлена!");
 
@@ -268,7 +288,7 @@ void PRINT_WINDOW_LOGIC::ButCreateTrainingClicked(){
             }else{
                 lab_status->setText("Превышен лимит символов в " + QString::number(SYMBOLS_LIMIT) + "!\n"
                                     "Последнее слово удалено!");
-                training->word_training_list.pop_back();
+                training_mode->word_training_list.pop_back();
             }
 
         }else{
@@ -289,14 +309,14 @@ void PRINT_WINDOW_LOGIC::ButCreateTrainingClicked(){
 ///////////////////////////////////////////////////////////////////////
 /// удаляет последнее слово на поле
 void PRINT_WINDOW_LOGIC::ButDeleteLastWordClicked(){
-    if(!training->word_training_list.empty()){//если не пусто, то удаляем последнее слово в тренировке
-        lab_status->setText("Удалено: "+training->word_training_list.last());
-        training->symbols_counter -= training->word_training_list.last().length()+1;//-1 так как есть ещё символ enter
-        ld_current_symbols->setText(QString::number(training->symbols_counter));
-        training->word_training_list.pop_back();
+    if(!training_mode->word_training_list.empty()){//если не пусто, то удаляем последнее слово в тренировке
+        lab_status->setText("Удалено: "+training_mode->word_training_list.last());
+        training_mode->symbols_counter -= training_mode->word_training_list.last().length()+1;//-1 так как есть ещё символ enter
+        ld_current_symbols->setText(QString::number(training_mode->symbols_counter));
+        training_mode->word_training_list.pop_back();
         browser_training_word->clear();
 
-        for(auto it = training->word_training_list.begin();it<training->word_training_list.end();++it) browser_training_word->append(*it);
+        for(auto it = training_mode->word_training_list.begin();it<training_mode->word_training_list.end();++it) browser_training_word->append(*it);
 
     }else{
         lab_status->setText("Тренировка пуста!");
@@ -314,14 +334,14 @@ void PRINT_WINDOW_LOGIC::ButDeleteLastWordClicked(){
 /// удаляет слово по поиску
 void PRINT_WINDOW_LOGIC::ButDeleteWordClicked(){
     bool found = false;
-    if(!training->word_training_list.empty()){ //если не пусто
-        for(auto it = training->word_training_list.begin();it<training->word_training_list.end();++it){ //тогда ищем слово для удаления в тренировке
+    if(!training_mode->word_training_list.empty()){ //если не пусто
+        for(auto it = training_mode->word_training_list.begin();it<training_mode->word_training_list.end();++it){ //тогда ищем слово для удаления в тренировке
 
             if(*it == ld_delete_word->text()){ //если находим, то удаляем его
-                training->symbols_counter -= it->length()+1;//уменьшаем кол-во символов в тренировке, -1 так как есть ещё символ enter
-                ld_current_symbols->setText(QString::number(training->symbols_counter));
+                training_mode->symbols_counter -= it->length()+1;//уменьшаем кол-во символов в тренировке, -1 так как есть ещё символ enter
+                ld_current_symbols->setText(QString::number(training_mode->symbols_counter));
                 lab_status->setText("Удалено: "+ *it);
-                training->word_training_list.erase(it);
+                training_mode->word_training_list.erase(it);
                 browser_training_word->clear();
                 found = true;
             }
@@ -331,7 +351,7 @@ void PRINT_WINDOW_LOGIC::ButDeleteWordClicked(){
             return;
         }
 
-        for(auto it = training->word_training_list.begin();it<training->word_training_list.end();++it) browser_training_word->append(*it);
+        for(auto it = training_mode->word_training_list.begin();it<training_mode->word_training_list.end();++it) browser_training_word->append(*it);
 
     }else{
         lab_status->setText("Тренировка пуста!");
@@ -352,8 +372,8 @@ void PRINT_WINDOW_LOGIC::ButDeleteWordClicked(){
 void PRINT_WINDOW_LOGIC::GetCreateTrainingComponents(QPushButton * but_delete_word, QPushButton *but_delete_last_word, QPushButton *but_add_file,
 QPushButton *but_add_word, QPushButton *but_publish_training, QLineEdit *ld_delete_word, QLineEdit *ld_training_name, QLineEdit *ld_add_word,
 QLineEdit *ld_current_symbols, QLabel *lab_status, QTextBrowser *browser_training_word){
-    training->symbols_counter = 0;
-    training->word_training_list.clear();
+    training_mode->symbols_counter = 0;
+    training_mode->word_training_list.clear();
 
     this->ld_current_symbols = ld_current_symbols;
     this->ld_training_name = ld_training_name;
@@ -409,7 +429,7 @@ void PRINT_WINDOW_LOGIC::LdFieldTextChanged(QString current_word){
                     sounds->Play(sounds->print_error); //звук ошибки
                     is_mistake = true;
                     first_time = false;
-                    if(!errors_mode) training->MistakeReader(edit_text, letter); // для анализа ошибок
+                    if(!errors_mode) training_mode->MistakeReader(edit_text, letter); // для анализа ошибок
                 }
 
         }else{    // если правильно ввели букву
@@ -422,13 +442,13 @@ void PRINT_WINDOW_LOGIC::LdFieldTextChanged(QString current_word){
                 line_size = letter;
 
                 if(!errors_mode){
-                    training->WordSpeedReader(ld_game_pole->text(),ld_game_pole->text().length()-1,abs(end_ms-start_ms)); //передаем длину слова и время написания его в мс
+                    training_mode->WordSpeedReader(ld_game_pole->text(),ld_game_pole->text().length()-1,abs(end_ms-start_ms)); //передаем длину слова и время написания его в мс
                     start_writing = true;                                               // length()-1, чтобы пробел не учитывать
                 }
 
                 ld_game_pole->clear();
             }else if(edit_text.length() - 1 == letter){
-                if(!errors_mode) training->WordSpeedReader(ld_game_pole->text()+" ",ld_game_pole->text().length(),abs(end_ms-start_ms)); // добавляю здесь " ", так как в другой функции
+                if(!errors_mode) training_mode->WordSpeedReader(ld_game_pole->text()+" ",ld_game_pole->text().length(),abs(end_ms-start_ms)); // добавляю здесь " ", так как в другой функции
             }                                                                                       //всегда удаляю пробел, а в конце строки его нет
 
             if(edit_text.length() -1  == letter){ //проверка на конец текста, -2 так как в конце каждой строки есть символ перехода на новую
@@ -459,12 +479,25 @@ void PRINT_WINDOW_LOGIC::LdFieldTextChanged(QString current_word){
 ///////////////////////////////////////////////////////////////////////
 /// при смене режима вызывает функции обновления данных на форме и тп
 void PRINT_WINDOW_LOGIC::BoxModeNamesCurrentIndexChanged(int){
-    mode->GetStatistics(box_mode_name->currentText(),box_training_name->currentText());
+    box_training_name->clear();//очищаем box
     but_start->setEnabled(true); // это если кнопка была заблочена, когда книга пройдена
-    OnUpdateData();
+    if(box_mode_name->currentText() == "text acting"){
 
-    mode->ClearStatisticsContainers();
-    mode->UpdateStatisticsContainers(box_mode_name->currentText(),box_training_name->currentText());
+        //this->chbox_use_texts_from_other_modes->setVisible(true);
+        //this->lab_use_question->setVisible(true);
+    }else{
+         mode->GetTrainingNames(this->box_mode_name->currentText()); //получаем имена тренировок по режиму
+
+         box_training_name->addItems(mode->training_names); //добавляем имена в box
+         mode->GetStatistics(box_mode_name->currentText(),box_training_name->currentText());//получаем статистику по тренировке
+         mode->ClearStatisticsContainers(); //очистках контейнеров с ошибками для добавления ошибок по загружаемой тренировке
+         mode->UpdateStatisticsContainers(box_mode_name->currentText(),box_training_name->currentText());
+        //this->chbox_use_texts_from_other_modes->setVisible(false);
+        //this->lab_use_question->setVisible(false);
+        //if(voice_acting_mode != nullptr) delete voice_acting_mode;
+    }
+
+    OnUpdateData();//обновление данных на поле
 }
 ///////////////////////////////////////////////////////////////////////
 ////////PRINT_WINDOW_LOGIC::BoxModeNamesCurrentIndexChanged////////////
@@ -518,7 +551,7 @@ void PRINT_WINDOW_LOGIC::ButStartClicked(){
 void PRINT_WINDOW_LOGIC::ButLoadTrainingClicked(){
     errors_mode = false;
     text_browser->clear();
-    text_browser->insertPlainText(training->GetTraining(box_mode_name->currentText(),box_training_name->currentText()));
+    text_browser->insertPlainText(training_mode->GetTraining(box_mode_name->currentText(),box_training_name->currentText()));
     edit_text = text_browser->toPlainText();
     but_start->setEnabled(true);
 }
@@ -694,6 +727,19 @@ void PRINT_WINDOW_LOGIC::ButCreateErrorsTrainingClicked(){
 ///////////////////////////////////////////////////////////////////////
 
 
+
+///////////////////////////////////////////////////////////////////////
+/////////////PRINT_WINDOW_LOGIC::ButVoiceSettingsClicked///////////////
+///////////////////////////////////////////////////////////////////////
+/// вызывает меню настройки озвучки текста
+void PRINT_WINDOW_LOGIC::ButVoiceSettingsClicked(){
+
+}
+///////////////////////////////////////////////////////////////////////
+/////////////PRINT_WINDOW_LOGIC::ButVoiceSettingsClicked///////////////
+///////////////////////////////////////////////////////////////////////
+
+
 ////////////////////////////////////////////////////////////////////////
 ///////////PRINT_WINDOW_LOGIC::BoxTrainingCurrentIndexChanged///////////
 ////////////////////////////////////////////////////////////////////////
@@ -706,6 +752,8 @@ void PRINT_WINDOW_LOGIC::BoxTrainingCurrentIndexChanged(int){
 
     mode->ClearStatisticsContainers();
     mode->UpdateStatisticsContainers(box_mode_name->currentText(),box_training_name->currentText());
+
+
 }
 ////////////////////////////////////////////////////////////////////////
 ///////////PRINT_WINDOW_LOGIC::BoxTrainingCurrentIndexChanged///////////
@@ -840,6 +888,24 @@ void PRINT_WINDOW_LOGIC::PlotMouseMove(QMouseEvent *event){
 }
 ///////////////////////////////////////////////////////////////////////
 //////////////////PRINT_WINDOW_LOGIC::PlotMouseMove////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+
+///////////////////////////////////////////////////////////////////////
+///////PRINT_WINDOW_LOGIC::CHBoxUseTextsFromOtherModesChecked//////////
+///////////////////////////////////////////////////////////////////////
+void PRINT_WINDOW_LOGIC::CHBoxUseTextsFromOtherModesChecked(){
+
+//    if(chbox_use_texts_from_other_modes->isChecked()){
+//        for(auto it = mode->mode_names.begin(); it!=mode->mode_names.end();++it){
+//            if(*it == "text acting" ) continue;
+
+//        }
+//    }
+}
+///////////////////////////////////////////////////////////////////////
+///////PRINT_WINDOW_LOGIC::CHBoxUseTextsFromOtherModesChecked//////////
 ///////////////////////////////////////////////////////////////////////
 
 
@@ -1011,7 +1077,7 @@ void PRINT_WINDOW_LOGIC::OnPauseTime(){
 /////////////////PRINT_WINDOW_LOGIC::OnUpdateData///////////////////////
 ////////////////////////////////////////////////////////////////////////
 /// функция обновляет данные после набора текста, или при загрузке
-/// приложения.
+/// приложения в информационных полях.
 void PRINT_WINDOW_LOGIC::OnUpdateData(){
     ld_text_amount->setText(QString::number(mode->text_amount)); //здесь заполняем данные для отображения на поле
     ld_record->setText(QString::number(floor(mode->record)));
