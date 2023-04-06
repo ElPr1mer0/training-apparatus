@@ -46,6 +46,8 @@ public:
     void SetBoxsYearsStyle(QComboBox*);
     void SetBoxsMonthsStyle(QComboBox*);
     void SetGroupPlotStyle(QGroupBox*);
+    void SetLdCurrentInfoStyle(QLineEdit *); //инфа при текущем наборе тренировки
+    void SetLdInfoStyle(QLineEdit *); //инфа по всем набором текущей тренировки
 
     ///ДОП ОКНО СОЗДАНИЯ ТРЕНИРОВКИ///
     void SetCreateTrainingWindowStyle(QWidget*);

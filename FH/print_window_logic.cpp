@@ -19,7 +19,7 @@
 PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_voice_settings,QPushButton *but_start, QPushButton *but_load_training,QComboBox *box_mode_name, QComboBox *box_training_name,
  QLineEdit *ld_game_pole, QLineEdit *ld_current_mistakes, QLineEdit *ld_current_speed, QLineEdit *ld_text_amount,
  QLineEdit *ld_record, QLineEdit *ld_average_speed, QLineEdit *ld_mistakes, QLineEdit *ld_all_time,
- QLineEdit *ld_current_min, QLineEdit *ld_current_sec, QTextBrowser *text_browser, QLabel* lab_current_mistakes,
+ QLineEdit *ld_current_min, QLineEdit *ld_current_sec,QTextBrowser *text_mistakes_browser, QTextBrowser *text_browser, QLabel* lab_current_mistakes,
  QPushButton *but_create_training, QPushButton *but_add_training,QPushButton *but_show_group_plot, QCustomPlot *plot,
  QPushButton *but_hide_group_plot, QComboBox *box_from_year, QComboBox *box_from_month, QComboBox *box_to_year,
  QComboBox *box_to_month, QGroupBox *group_plot, QLineEdit *ld_plot_value, QGroupBox *group_game_pole,
@@ -56,6 +56,7 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_voice_settings,QPushButt
     this->ld_plot_value  = ld_plot_value;
 
     this->text_browser = text_browser;
+    this->text_mistakes_browser = text_mistakes_browser;
 
     this->lab_current_mistakes = lab_current_mistakes;
 
@@ -77,8 +78,12 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_voice_settings,QPushButt
     this->chbox_words_speed = chbox_words_speed;
 
     this->ld_game_pole->setEnabled(false);
+
     this->but_start->setEnabled(false);
+    this->but_voice_settings->setVisible(false);
+
     this->box_training_name->clear();
+
     this->chbox_speed->setCheckState(Qt::Checked);
     this->chbox_letter_errors->setCheckState(Qt::Checked);
     //this->chbox_use_texts_from_other_modes->setVisible(false);
@@ -156,6 +161,25 @@ PRINT_WINDOW_LOGIC::~PRINT_WINDOW_LOGIC(){
 }
 ///////////////////////////////////////////////////////////////////////
 ////////////////PRINT_WINDOW_LOGIC::~PRINT_WINDOW_LOGIC////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+
+///////////////////////////////////////////////////////////////////////
+/////////////PRINT_WINDOW_LOGIC::~ChangeStyleEnteredWords//////////////
+///////////////////////////////////////////////////////////////////////
+/// меняет стиль напечатанного текста на другой, для отличия от того,
+/// что нужно еще печатать
+void PRINT_WINDOW_LOGIC::ChangeStyleEnteredWords(const int &index){
+    QString text_editing = "<font color = SlateBlue face=Arial> <strong>"+ edit_text.mid(0,index) + "</strong></font> "; // из исходного текста мы берем самое начало + index,
+    //который обозначает конец последнего введенного слова, и для этого всего мы меняем стиль оторажения в браузере
+    text_editing += edit_text.mid(index+1,edit_text.length()-1); //потом мы добавляем оставшийся текст, который еще не был введен пользователем
+
+    text_browser->clear(); //обнуляем браузер
+    text_browser->append(text_editing);
+}
+///////////////////////////////////////////////////////////////////////
+/////////////PRINT_WINDOW_LOGIC::~ChangeStyleEnteredWords//////////////
 ///////////////////////////////////////////////////////////////////////
 
 
@@ -441,6 +465,8 @@ void PRINT_WINDOW_LOGIC::LdFieldTextChanged(QString current_word){
             if(current_word[letter - 1 - line_size] == ' '){ //когда ввели все слово правильно -1, так как до этого выше увеличил на 1, а это значени след буквы
                 line_size = letter;
 
+                ChangeStyleEnteredWords(letter-1);// когда правильно ввели слово, меняем его цвет на другой для лучшей видимости на браузере
+
                 if(!errors_mode){
                     training_mode->WordSpeedReader(ld_game_pole->text(),ld_game_pole->text().length()-1,abs(end_ms-start_ms)); //передаем длину слова и время написания его в мс
                     start_writing = true;                                               // length()-1, чтобы пробел не учитывать
@@ -482,16 +508,18 @@ void PRINT_WINDOW_LOGIC::BoxModeNamesCurrentIndexChanged(int){
     box_training_name->clear();//очищаем box
     but_start->setEnabled(true); // это если кнопка была заблочена, когда книга пройдена
     if(box_mode_name->currentText() == "text acting"){
-
+        but_voice_settings->setVisible(true);
         //this->chbox_use_texts_from_other_modes->setVisible(true);
         //this->lab_use_question->setVisible(true);
     }else{
-         mode->GetTrainingNames(this->box_mode_name->currentText()); //получаем имена тренировок по режиму
+        but_voice_settings->setVisible(false);
 
-         box_training_name->addItems(mode->training_names); //добавляем имена в box
-         mode->GetStatistics(box_mode_name->currentText(),box_training_name->currentText());//получаем статистику по тренировке
-         mode->ClearStatisticsContainers(); //очистках контейнеров с ошибками для добавления ошибок по загружаемой тренировке
-         mode->UpdateStatisticsContainers(box_mode_name->currentText(),box_training_name->currentText());
+        mode->GetTrainingNames(this->box_mode_name->currentText()); //получаем имена тренировок по режиму
+
+        box_training_name->addItems(mode->training_names); //добавляем имена в box
+        mode->GetStatistics(box_mode_name->currentText(),box_training_name->currentText());//получаем статистику по тренировке
+        mode->ClearStatisticsContainers(); //очистках контейнеров с ошибками для добавления ошибок по загружаемой тренировке
+        mode->UpdateStatisticsContainers(box_mode_name->currentText(),box_training_name->currentText());
         //this->chbox_use_texts_from_other_modes->setVisible(false);
         //this->lab_use_question->setVisible(false);
         //if(voice_acting_mode != nullptr) delete voice_acting_mode;
@@ -511,8 +539,8 @@ void PRINT_WINDOW_LOGIC::BoxModeNamesCurrentIndexChanged(int){
 /// начинает тренировку, проверяет есть ли текст в поле, обнуляет неко-
 /// торые данные и запускает таймер
 void PRINT_WINDOW_LOGIC::ButStartClicked(){
-    if(text_browser->toPlainText() == ""){
-        text_browser->insertPlainText("Text not Loaded");
+    if(text_browser->toPlainText() == ""){ //если браузер пуст, значит тренировка не загрузилась
+        text_browser->insertPlainText("Ошибка, тренировка не загрузилась или она не содержит текста!");
         ld_game_pole->setEnabled(false);
     }
     else{
@@ -551,6 +579,8 @@ void PRINT_WINDOW_LOGIC::ButStartClicked(){
 void PRINT_WINDOW_LOGIC::ButLoadTrainingClicked(){
     errors_mode = false;
     text_browser->clear();
+    text_mistakes_browser->clear();
+    text_mistakes_browser->setVisible(false);
     text_browser->insertPlainText(training_mode->GetTraining(box_mode_name->currentText(),box_training_name->currentText()));
     edit_text = text_browser->toPlainText();
     but_start->setEnabled(true);
@@ -1154,6 +1184,7 @@ void PRINT_WINDOW_LOGIC::IsWin(){
     box_training_name->setEnabled(true);
     but_load_training->setEnabled(true);
     text_browser->clear();
+    text_mistakes_browser->setVisible(true);
 }
 ////////////////////////////////////////////////////////////////////////
 /////////////////////PRINT_WINDOW_LOGIC::IsWin//////////////////////////

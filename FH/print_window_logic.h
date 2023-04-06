@@ -59,6 +59,7 @@ private:
 
     QTextBrowser *text_browser = nullptr;
     QTextBrowser *browser_training_word = nullptr;
+    QTextBrowser *text_mistakes_browser = nullptr;
 
     QLabel *lab_current_mistakes = nullptr;
     QLabel *lab_status = nullptr;
@@ -117,13 +118,15 @@ private:
 
 public:
     PRINT_WINDOW_LOGIC(QPushButton *,QPushButton *, QPushButton *,QComboBox *, QComboBox *, QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *,
-                       QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *, QTextBrowser *,
+                       QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *,QTextBrowser *, QTextBrowser *,
                        QLabel*, QPushButton *, QPushButton *, QPushButton *, QCustomPlot *, QPushButton *,QComboBox *,
                        QComboBox *, QComboBox *, QComboBox *, QGroupBox *, QLineEdit *, QGroupBox *, QCheckBox *,
                        QCheckBox *, QCheckBox *, QCheckBox *, QCheckBox *, QCheckBox * , QCheckBox *, QPushButton *,
                        QGroupBox *, QPushButton *);
 
     ~PRINT_WINDOW_LOGIC();
+
+    void ChangeStyleEnteredWords(const int &index); // меняет стиль текста для правильно написанных слов в тренировке
 
 public slots:
     void GetCreateTrainingComponents(QPushButton*, QPushButton*, QPushButton*, QPushButton*, QPushButton*, QLineEdit*,

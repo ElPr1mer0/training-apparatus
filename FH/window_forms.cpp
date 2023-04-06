@@ -231,11 +231,12 @@ void WINDOWS::SetPrintWindow(){
     QVBoxLayout *v_center_l = new QVBoxLayout;
     h_main_print_l->addLayout(v_center_l);
     QGroupBox *group_game_pole = new QGroupBox;
+    group_game_pole->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Expanding);
     v_center_l->addWidget(group_game_pole);
     QVBoxLayout *v_group_game_pole_l = new QVBoxLayout(group_game_pole);
     QTextBrowser *text_browser = new QTextBrowser;
     v_group_game_pole_l->addWidget(text_browser);
-    text_browser->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+    text_browser->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::MinimumExpanding);
 
     QVBoxLayout *v_game_pole_l = new QVBoxLayout;
     v_group_game_pole_l->addLayout(v_game_pole_l);
@@ -250,31 +251,42 @@ void WINDOWS::SetPrintWindow(){
     h_current_info_l->addLayout(v_current_mistakes_l);
     QLineEdit *ld_current_mistakes = new QLineEdit;
     QLabel *lab_current_mistakes = new QLabel("Ошибки: ");
-    v_current_mistakes_l->addWidget(lab_current_mistakes,1,Qt::AlignTop);
-    v_current_mistakes_l->addWidget(ld_current_mistakes,1,Qt::AlignTop);
+    v_current_mistakes_l->addWidget(lab_current_mistakes,1,Qt::AlignTop|Qt::AlignLeft);
+    v_current_mistakes_l->addWidget(ld_current_mistakes,1,Qt::AlignTop|Qt::AlignLeft);
 
     QHBoxLayout *v_current_speed_l = new QHBoxLayout;
     h_current_info_l->addLayout(v_current_speed_l);
     QLineEdit *ld_current_speed = new QLineEdit;
-    QLabel *lab_current_speed = new QLabel("Скорость");
-    v_current_speed_l->addWidget(lab_current_speed,1,Qt::AlignTop);
-    v_current_speed_l->addWidget(ld_current_speed,1,Qt::AlignTop);
+    QLabel *lab_current_speed = new QLabel("Скорость:");
+    v_current_speed_l->addWidget(lab_current_speed,1,Qt::AlignTop|Qt::AlignLeft);
+    v_current_speed_l->addWidget(ld_current_speed,1,Qt::AlignTop|Qt::AlignLeft);
 
     QHBoxLayout *v_play_time_l = new QHBoxLayout;
     h_current_info_l->addLayout(v_play_time_l);
     QLineEdit *ld_current_min = new QLineEdit;
     QLineEdit *ld_current_sec = new QLineEdit;
-    QLabel *lab_play_time = new QLabel("Время набора");
-    QLabel *lab_current_min = new QLabel("мин");
-    QLabel *lab_current_sec = new QLabel("сек");
-    v_play_time_l->addWidget(lab_play_time,1,Qt::AlignTop);
-    v_play_time_l->addWidget(lab_current_min,1,Qt::AlignTop);
+    QLabel *lab_play_time = new QLabel("Время набора мин:");
+   // QLabel *lab_current_min = new QLabel("мин:");
+    QLabel *lab_current_sec = new QLabel("сек:");
+    v_play_time_l->addWidget(lab_play_time,1,Qt::AlignTop|Qt::AlignRight);
+    //v_play_time_l->addWidget(lab_current_min,1,Qt::AlignTop|Qt::AlignRight);
     v_play_time_l->addWidget(ld_current_min,1,Qt::AlignTop);
-    v_play_time_l->addWidget(lab_current_sec,1,Qt::AlignTop);
+    v_play_time_l->addWidget(lab_current_sec,1,Qt::AlignTop|Qt::AlignRight);
     v_play_time_l->addWidget(ld_current_sec,1,Qt::AlignTop);
 
+    my_style->SetLdCurrentInfoStyle(ld_current_min);
+    my_style->SetLdCurrentInfoStyle(ld_current_mistakes);
+    my_style->SetLdCurrentInfoStyle(ld_current_sec);
+    my_style->SetLdCurrentInfoStyle(ld_current_speed);
 
-    QGroupBox *group_plot = new QGroupBox;
+    QTextBrowser *text_mistakes_browser = new QTextBrowser;
+    v_group_game_pole_l->addWidget(text_mistakes_browser);
+    text_mistakes_browser->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
+    text_mistakes_browser->setVisible(false);
+
+
+
+    QGroupBox *group_plot = new QGroupBox; // группа отображения графика на форме
     v_center_l->addWidget(group_plot);
     group_plot->setTitle("Результаты работы за промежуток");
     QVBoxLayout *v_group_l = new QVBoxLayout(group_plot);
@@ -292,7 +304,7 @@ void WINDOWS::SetPrintWindow(){
     h_group_l->addWidget(box_to_year);
     h_group_l->addWidget(box_to_month);
     h_group_l->addWidget(but_hide_group_plot);
-    plot = new QCustomPlot; // нужно ещё удалять этот объект
+    plot = new QCustomPlot;
     v_group_l->addWidget(plot);
     QHBoxLayout *h_plot_l = new QHBoxLayout;
     v_group_l->addLayout(h_plot_l);
@@ -307,16 +319,10 @@ void WINDOWS::SetPrintWindow(){
     h_plot_l->addWidget(chbox_amount_text);
 
 
-
     ///////////////////////////RIGHT_LAYOUT/////////////////////
     QVBoxLayout *v_right_l = new QVBoxLayout;
     h_main_print_l->addLayout(v_right_l);
-   // QHBoxLayout *h_use_question_l = new QHBoxLayout;
-  //  v_right_l->addLayout(h_use_question_l);
-   // QCheckBox *chbox_use_texts_from_other_modes = new QCheckBox;
-   // h_use_question_l->addWidget(chbox_use_texts_from_other_modes);
-   // QLabel *lab_use_question = new QLabel("Использовать тренировки из других модов?");
-    //h_use_question_l->addWidget(lab_use_question);
+
     QPushButton *but_voice_settings = new QPushButton("Настройка озвучки");
     v_right_l->addWidget(but_voice_settings);
     QComboBox *box_mode_name = new QComboBox;
@@ -385,8 +391,14 @@ void WINDOWS::SetPrintWindow(){
     my_style->SetPlotSpeedStyle(plot);
     my_style->SetGroupPlotStyle(group_plot);
 
+    my_style->SetLdInfoStyle(ld_text_amount);
+    my_style->SetLdInfoStyle(ld_record);
+    my_style->SetLdInfoStyle(ld_average_speed);
+    my_style->SetLdInfoStyle(ld_mistakes);
+    my_style->SetLdInfoStyle(ld_all_time);
+
     print_window_logic = new PRINT_WINDOW_LOGIC(but_voice_settings,but_start, but_load_training,box_mode_name,box_training_name, ld_game_pole, ld_current_mistakes,
-    ld_current_speed, ld_text_amount, ld_record, ld_average_speed,  ld_mistakes, ld_all_time, ld_current_min, ld_current_sec,
+    ld_current_speed, ld_text_amount, ld_record, ld_average_speed,  ld_mistakes, ld_all_time, ld_current_min, ld_current_sec, text_mistakes_browser,
     text_browser, lab_current_mistakes, but_create_training, but_add_training, but_show_plot, plot, but_hide_group_plot, box_from_year,
     box_from_month, box_to_year, box_to_month, group_plot, ld_plot_value, group_game_pole,chbox_amount_text,
     chbox_speed, chbox_mistake, chbox_letter_errors, chbox_syllable_errors, chbox_word_errors, chbox_words_speed, but_show_word_statistic,

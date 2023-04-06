@@ -178,7 +178,7 @@ void WIDGET_STYLE::SetTBHomePanelStyle(QToolBox *tb_home_panel){
 void WIDGET_STYLE::SetPrintSpeedWindowStyle(QWidget *print_window){
     print_window->setWindowTitle("Тренировка скорости печати");
     print_window->setMinimumSize(1200,640);
-    print_window->setMaximumSize(1920,1080);
+   // print_window->setMaximumSize(1920,1080);
 
 
     print_window->setStyleSheet(
@@ -332,6 +332,16 @@ void WIDGET_STYLE::SetBoxsMonthsStyle(QComboBox* box_month){
 
 void WIDGET_STYLE::SetGroupPlotStyle(QGroupBox *group_plot){
     group_plot->setVisible(false);
+}
+
+void WIDGET_STYLE::SetLdCurrentInfoStyle(QLineEdit *ld_current_info){
+    ld_current_info->setFocusPolicy(Qt::NoFocus);
+    ld_current_info->setReadOnly(true);
+}
+
+void WIDGET_STYLE::SetLdInfoStyle(QLineEdit *ld_info){
+    ld_info->setFocusPolicy(Qt::NoFocus);
+    ld_info->setReadOnly(true);
 }
 
 void WIDGET_STYLE::SetCreateTrainingWindowStyle(QWidget *create_training_window){
