@@ -79,7 +79,6 @@ private:
     QComboBox *box_to_year = nullptr;
     QComboBox *box_to_month = nullptr;
 
-  //  QCheckBox *chbox_use_texts_from_other_modes = nullptr;
     QCheckBox *chbox_amount_text = nullptr;
     QCheckBox *chbox_speed = nullptr;
     QCheckBox *chbox_mistake = nullptr;
@@ -88,7 +87,6 @@ private:
     QCheckBox *chbox_word_errors = nullptr;
     QCheckBox *chbox_words_speed = nullptr;
 
-  //  QLabel *lab_use_question = nullptr;
 
     MODE *mode = nullptr;
     TRAINING_MODE *training_mode  = nullptr;
@@ -101,6 +99,7 @@ private:
     int pause_time = 0;
 
     QString edit_text; //тренировочный текст
+    QString mistakes_text; // текст, который будет выводиться в конце тренировки со всеми ошибками
 
     int letter = 0; // для подсчёта кол-ва пройденных символов в editBrowser
     int line_size = 0; // для подсчета реального кол-ва символов, которые были в введенной игроком строке
@@ -126,7 +125,9 @@ public:
 
     ~PRINT_WINDOW_LOGIC();
 
-    void ChangeStyleEnteredWords(const int &index); // меняет стиль текста для правильно написанных слов в тренировке
+private:
+    void ChangeStyleEnteredLetters(const int &index ); // меняет стиль текста для правильно написанных букв в тренировке
+    void AlterMistakesText(QChar right_letter, QChar error_letter);// сюда будем записывать текст с ошибками, для показа их после тренировки
 
 public slots:
     void GetCreateTrainingComponents(QPushButton*, QPushButton*, QPushButton*, QPushButton*, QPushButton*, QLineEdit*,

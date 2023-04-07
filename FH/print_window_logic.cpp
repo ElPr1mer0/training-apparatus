@@ -66,9 +66,6 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_voice_settings,QPushButt
     this->group_game_pole = group_game_pole;
     this->group_report = group_report;
 
-    //this->lab_use_question = lab_use_question;
-
-    //this->chbox_use_texts_from_other_modes = chbox_use_texts_from_other_modes;
     this->chbox_amount_text = chbox_amount_text;
     this->chbox_mistake = chbox_mistake;
     this->chbox_speed = chbox_speed;
@@ -86,8 +83,6 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_voice_settings,QPushButt
 
     this->chbox_speed->setCheckState(Qt::Checked);
     this->chbox_letter_errors->setCheckState(Qt::Checked);
-    //this->chbox_use_texts_from_other_modes->setVisible(false);
-    //this->lab_use_question->setVisible(false);
 
 
     sounds = new SOUNDS;
@@ -100,8 +95,6 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_voice_settings,QPushButt
 
     mode->GetTrainingNames(this->box_mode_name->currentText());   // подгружаем названия наших тренировок в box_training_name_name
     this->box_training_name->addItems(mode->training_names);//загрузка названий тренировок режима
-
-
 
 
     pause_timer = new QTimer(this); //создаем таймер для паузы
@@ -129,7 +122,6 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_voice_settings,QPushButt
     connect(this->plot, &QCustomPlot::mousePress, this, &PRINT_WINDOW_LOGIC::PlotMousePress);
     connect(this->plot, &QCustomPlot::mouseMove, this, &PRINT_WINDOW_LOGIC::PlotMouseMove);
 
-    //connect(this->chbox_use_texts_from_other_modes, SIGNAL(clicked()),this, SLOT(CHBoxUseTextsFromOtherModesChecked()));
     connect(this->chbox_amount_text, SIGNAL(clicked()),this, SLOT(CHBoxAmountTextChecked()));
     connect(this->chbox_speed, SIGNAL(clicked()),this, SLOT(CHBoxSpeedChecked()));
     connect(this->chbox_mistake, SIGNAL(clicked()),this, SLOT(CHBoxMistakeChecked()));
@@ -159,8 +151,29 @@ PRINT_WINDOW_LOGIC::~PRINT_WINDOW_LOGIC(){
     delete mode;
     //?delete sounds;
 }
+
+
 ///////////////////////////////////////////////////////////////////////
 ////////////////PRINT_WINDOW_LOGIC::~PRINT_WINDOW_LOGIC////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+
+///////////////////////////////////////////////////////////////////////
+/////////////PRINT_WINDOW_LOGIC::ChangeStyleEnteredLetters/////////////
+///////////////////////////////////////////////////////////////////////
+/// функция принимает index - позиция, до которой были правильно введе-
+/// ны символы (и до этой позиции мы их окрашиваем), а остальнаые сим-
+/// волы, которые идут после мы оставляем без изменения
+void PRINT_WINDOW_LOGIC::ChangeStyleEnteredLetters(const int &index){
+    QString text_editing = "<font color = SlateBlue face = Arial><strong>"+ edit_text.mid(0,index+1) + "</strong></font>"; // из исходного текста мы берем самое начало + index,
+    text_editing += edit_text.midRef(index+1,edit_text.length()-1); //потом мы добавляем оставшийся текст, который еще не был введен пользователем
+
+    text_browser->clear(); //обнуляем браузер
+    text_browser->append(text_editing);
+}
+///////////////////////////////////////////////////////////////////////
+/////////////PRINT_WINDOW_LOGIC::ChangeStyleEnteredLetters/////////////
 ///////////////////////////////////////////////////////////////////////
 
 
@@ -170,16 +183,32 @@ PRINT_WINDOW_LOGIC::~PRINT_WINDOW_LOGIC(){
 ///////////////////////////////////////////////////////////////////////
 /// меняет стиль напечатанного текста на другой, для отличия от того,
 /// что нужно еще печатать
-void PRINT_WINDOW_LOGIC::ChangeStyleEnteredWords(const int &index){
-    QString text_editing = "<font color = SlateBlue face=Arial> <strong>"+ edit_text.mid(0,index) + "</strong></font> "; // из исходного текста мы берем самое начало + index,
-    //который обозначает конец последнего введенного слова, и для этого всего мы меняем стиль оторажения в браузере
-    text_editing += edit_text.mid(index+1,edit_text.length()-1); //потом мы добавляем оставшийся текст, который еще не был введен пользователем
+//void PRINT_WINDOW_LOGIC::ChangeStyleEnteredWords(const int &index){
+//    QString text_editing = "<font color = SlateBlue face=Arial> <strong>"+ edit_text.mid(0,index) + "</strong></font> "; // из исходного текста мы берем самое начало + index,
+//    //который обозначает конец последнего введенного слова, и для этого всего мы меняем стиль оторажения в браузере
+//    text_editing += edit_text.mid(index+1,edit_text.length()-1); //потом мы добавляем оставшийся текст, который еще не был введен пользователем
 
-    text_browser->clear(); //обнуляем браузер
-    text_browser->append(text_editing);
-}
+//    text_browser->clear(); //обнуляем браузер
+//    text_browser->append(text_editing);
+//}
 ///////////////////////////////////////////////////////////////////////
 /////////////PRINT_WINDOW_LOGIC::~ChangeStyleEnteredWords//////////////
+///////////////////////////////////////////////////////////////////////
+
+
+
+///////////////////////////////////////////////////////////////////////
+////////////////PRINT_WINDOW_LOGIC::~AlterMistakesText/////////////////
+///////////////////////////////////////////////////////////////////////
+/// окрашивает правильно введеные буквы в один цвет, неправильные - в
+/// другой и добавляет их в mistakes_text
+void PRINT_WINDOW_LOGIC::AlterMistakesText(QChar right_letter, QChar error_letter){
+    right_letter == error_letter? mistakes_text =mistakes_text + "<font color = SlateBlue face=Arial><strong>"+ right_letter +"</strong></font>":
+    mistakes_text = mistakes_text + "<s><font color=Maroon face=Arial><strong>" + error_letter + "</strong></font></s>";
+    //right_letter если right_letter = error_letter, тогда это не ошибка и менять цвет буквы не надо, иначе меняем
+}
+///////////////////////////////////////////////////////////////////////
+////////////////PRINT_WINDOW_LOGIC::~AlterMistakesText/////////////////
 ///////////////////////////////////////////////////////////////////////
 
 
@@ -423,9 +452,9 @@ QLineEdit *ld_current_symbols, QLabel *lab_status, QTextBrowser *browser_trainin
 
 
 
-////////////////////////////////////////////////////////////////////////
-/////////////////PRINT_WINDOW_LOGIC::LdFieldTextChanged/////////////////
-////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+/////////////////PRINT_WINDOW_LOGIC::LdFieldTextChanged////////////////
+///////////////////////////////////////////////////////////////////////
 /// обрабатывает события изменения вводимого текста в поле при наборе
 /// тренировки, фиксирует ошибки, проверяет на победу.
 void PRINT_WINDOW_LOGIC::LdFieldTextChanged(QString current_word){
@@ -454,18 +483,19 @@ void PRINT_WINDOW_LOGIC::LdFieldTextChanged(QString current_word){
                     is_mistake = true;
                     first_time = false;
                     if(!errors_mode) training_mode->MistakeReader(edit_text, letter); // для анализа ошибок
+                    AlterMistakesText(edit_text[letter],current_word[letter - line_size]); //выделение ошибки в mistakes_text после тренировки
                 }
 
-        }else{    // если правильно ввели букву
 
+        }else{    // если правильно ввели букву
+            ChangeStyleEnteredLetters(letter);// меняем цвет правильно введенной буквы
+            AlterMistakesText(current_word[letter - line_size ],current_word[letter - line_size ]); //если правильно ввели букву, то запишем только правильлный ответ
             was_minus = false;                            // для статистики скорости набора слова
             is_mistake = false;
             letter++;
 
             if(current_word[letter - 1 - line_size] == ' '){ //когда ввели все слово правильно -1, так как до этого выше увеличил на 1, а это значени след буквы
                 line_size = letter;
-
-                ChangeStyleEnteredWords(letter-1);// когда правильно ввели слово, меняем его цвет на другой для лучшей видимости на браузере
 
                 if(!errors_mode){
                     training_mode->WordSpeedReader(ld_game_pole->text(),ld_game_pole->text().length()-1,abs(end_ms-start_ms)); //передаем длину слова и время написания его в мс
@@ -479,13 +509,18 @@ void PRINT_WINDOW_LOGIC::LdFieldTextChanged(QString current_word){
 
             if(edit_text.length() -1  == letter){ //проверка на конец текста, -2 так как в конце каждой строки есть символ перехода на новую
                                      //n, его нам считать не надо, и ещё -1 так как с нуля идет счет
+                AlterMistakesText(edit_text[edit_text.length()-1],edit_text[edit_text.length()-1]);//нужно вызывать, чтобы последний символ тренировки попал под редактирование
                 IsWin(); //победа
             }
         }
     }
     else{
-            if(letter>current_word.length() +line_size && letter>0){ //сюда попадаем, когда стираем символы, которые были правильными
-                --letter;
+            if(letter>current_word.length() +line_size && letter>0){ //сюда попадаем, когда стираем символы, которые были правильными                                
+                ChangeStyleEnteredLetters(current_word.length() +line_size-1);
+                //current_word.length() + line_size - 1 - это текущая позиция index для окрашивания текста в обычный
+
+                letter = current_word.length() +line_size; // может произойти такое, что пользователь нажмет back и сотрет сразу много символов
+
                 first_time = true;
             }
             else{
@@ -495,7 +530,7 @@ void PRINT_WINDOW_LOGIC::LdFieldTextChanged(QString current_word){
     }
 }
 ///////////////////////////////////////////////////////////////////////
-/////////////////PRINT_WINDOW_LOGIC::LdFieldTextChanged/////////////////
+/////////////////PRINT_WINDOW_LOGIC::LdFieldTextChanged////////////////
 ///////////////////////////////////////////////////////////////////////
 
 
@@ -579,6 +614,7 @@ void PRINT_WINDOW_LOGIC::ButStartClicked(){
 void PRINT_WINDOW_LOGIC::ButLoadTrainingClicked(){
     errors_mode = false;
     text_browser->clear();
+    mistakes_text = ""; //нужно обнулить, чтобы старые ошибки не отображались
     text_mistakes_browser->clear();
     text_mistakes_browser->setVisible(false);
     text_browser->insertPlainText(training_mode->GetTraining(box_mode_name->currentText(),box_training_name->currentText()));
@@ -1185,6 +1221,7 @@ void PRINT_WINDOW_LOGIC::IsWin(){
     but_load_training->setEnabled(true);
     text_browser->clear();
     text_mistakes_browser->setVisible(true);
+    text_mistakes_browser->append(mistakes_text);
 }
 ////////////////////////////////////////////////////////////////////////
 /////////////////////PRINT_WINDOW_LOGIC::IsWin//////////////////////////

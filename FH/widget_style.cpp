@@ -31,7 +31,6 @@ void WIDGET_STYLE::SetLoginLineEditStyle(QLineEdit *ld_login){
     ld_login->setFont(text);
     ld_login->setFrame(false);
     ld_login->setStyleSheet("background-color: #d9d9d9;");
-
 }
 
 
@@ -42,7 +41,6 @@ void WIDGET_STYLE::SetLabWelcomeStyle(QLabel *lab_welcome){
     text.setFamily("Candara");
     lab_welcome->setFont(text);
     lab_welcome->setAlignment(Qt::AlignHCenter);
-
 }
 
 
@@ -63,7 +61,6 @@ void WIDGET_STYLE::SetButSignInStyle(QPushButton *but_sign_in){
                                "}"
                                     );
     but_sign_in->setMinimumSize(100,30);
-
 }
 
 
@@ -85,7 +82,6 @@ void WIDGET_STYLE::SetButRegistrationStyle(QPushButton *but_registration){
                                     );
 
     but_registration->setMinimumSize(100,30);
-
 }
 
 
@@ -123,7 +119,6 @@ void WIDGET_STYLE::SetButSignInStyle2(QPushButton *but_sign_in){
                                );
     but_sign_in->setMinimumSize(100,30);
     but_sign_in->setMaximumSize(100,30);
-
 }
 
 
@@ -145,7 +140,6 @@ void WIDGET_STYLE::SetButBackStyle(QPushButton *but_back){
                             );
     but_back->setMinimumSize(40,20);
     but_back->setMaximumSize(40,20);
-
 }
 
 
@@ -154,7 +148,6 @@ void WIDGET_STYLE::SetButBackStyle(QPushButton *but_back){
 void WIDGET_STYLE::SetHomeWindowStyle(QWidget *home_window){
     home_window->setWindowTitle("Хаб аристократов :)");
     home_window->setMinimumSize(1200,640);
-    //home_window->setMaximumSize(10000,10000);
   //  home_window->setWindowFlags(Qt::WindowMinMaxButtonsHint|Qt::WindowFullscreenButtonHint|
     //                            Qt::WindowCloseButtonHint);
 
@@ -178,23 +171,15 @@ void WIDGET_STYLE::SetTBHomePanelStyle(QToolBox *tb_home_panel){
 void WIDGET_STYLE::SetPrintSpeedWindowStyle(QWidget *print_window){
     print_window->setWindowTitle("Тренировка скорости печати");
     print_window->setMinimumSize(1200,640);
-   // print_window->setMaximumSize(1920,1080);
-
-
-    print_window->setStyleSheet(
-                               "background-color: #d9d9d9;"
-
-                );
+    print_window->setStyleSheet("background-color: #d9d9d9;" );
 }
 
 void WIDGET_STYLE::SetTextBrowserStyle(QTextBrowser *text_browser){
     QFont text;
     text.setPixelSize(20);
     text.setBold(true);
-    text.setFamily("Candara Light");
+    text.setFamily("Arial");
     text_browser->setFont(text);
-
-
 }
 
 void WIDGET_STYLE::SetPlotMistakeStyle(QCustomPlot *plot){
@@ -312,7 +297,6 @@ void WIDGET_STYLE::SetBoxsYearsStyle(QComboBox* box_year){
     for(int i = 0; i<5; ++i){
         box_year->addItem(QString::number(2019+i));
     }
-
 }
 
 void WIDGET_STYLE::SetBoxsMonthsStyle(QComboBox* box_month){
@@ -455,13 +439,7 @@ void WIDGET_STYLE::SetBrowserTrainingWordStyle(QTextBrowser *browser_training_wo
 void WIDGET_STYLE::SetReactionSpeedWindowStyle(QWidget *reaction_speed_window){
     reaction_speed_window->setWindowTitle("Тест на скорость реакции");
     reaction_speed_window->setMinimumSize(800,720);
-    reaction_speed_window->setMaximumSize(1920,1080);
-
-
-    reaction_speed_window->setStyleSheet(
-                               "background-color: white;"
-
-                );
+    reaction_speed_window->setStyleSheet("background-color: white;");
 }
 
 void WIDGET_STYLE::SetButReactionSpeedStyle(QPushButton *but_reaction_speed){
@@ -478,7 +456,6 @@ void WIDGET_STYLE::SetButReactionSpeedStyle(QPushButton *but_reaction_speed){
                                       "}"
                                     );
     but_reaction_speed->setMinimumSize(200,250);
-
 }
 
 void WIDGET_STYLE::SetButReactionSpeedCanClickStyle(QPushButton *but_reaction_speed){
@@ -495,7 +472,6 @@ void WIDGET_STYLE::SetLabResultStyle(QLabel *lab_result){
     text.setFamily("Candara Light");
     lab_result->setFont(text);
 
-
     lab_result->setStyleSheet("QLabel{"
                               "    background-color:  #238c11;"
                               "}"
@@ -507,7 +483,6 @@ void WIDGET_STYLE::SetLabInfoStyle(QLabel *lab_info){
     text.setPixelSize(25);
     text.setFamily("Candara Light");
     lab_info->setFont(text);
-
 }
 
 

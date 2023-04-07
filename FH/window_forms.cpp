@@ -318,6 +318,15 @@ void WINDOWS::SetPrintWindow(){
     h_plot_l->addWidget(chbox_mistake);
     h_plot_l->addWidget(chbox_amount_text);
 
+    my_style->SetTextBrowserStyle(text_browser);
+    my_style->SetTextBrowserStyle(text_mistakes_browser);
+    my_style->SetBoxsMonthsStyle(box_from_month);
+    my_style->SetBoxsMonthsStyle(box_to_month);
+    my_style->SetBoxsYearsStyle(box_from_year);
+    my_style->SetBoxsYearsStyle(box_to_year);
+    my_style->SetPlotSpeedStyle(plot);
+    my_style->SetGroupPlotStyle(group_plot);
+
 
     ///////////////////////////RIGHT_LAYOUT/////////////////////
     QVBoxLayout *v_right_l = new QVBoxLayout;
@@ -382,14 +391,6 @@ void WINDOWS::SetPrintWindow(){
 
     QSpacerItem *info_l_spacer = new QSpacerItem(0,100,QSizePolicy::Fixed,QSizePolicy::Expanding);
     v_right_l->addSpacerItem(info_l_spacer);
-
-    my_style->SetTextBrowserStyle(text_browser);
-    my_style->SetBoxsMonthsStyle(box_from_month);
-    my_style->SetBoxsMonthsStyle(box_to_month);
-    my_style->SetBoxsYearsStyle(box_from_year);
-    my_style->SetBoxsYearsStyle(box_to_year);
-    my_style->SetPlotSpeedStyle(plot);
-    my_style->SetGroupPlotStyle(group_plot);
 
     my_style->SetLdInfoStyle(ld_text_amount);
     my_style->SetLdInfoStyle(ld_record);
