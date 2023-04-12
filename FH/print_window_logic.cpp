@@ -88,7 +88,7 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_voice_settings,QPushButt
     sounds = new SOUNDS;
     mode = new MODE;
     training_mode = new TRAINING_MODE(mode->db);
-    voice_acting_mode = new VOICE_ACTING_MODE(this->text_browser,mode->db);
+    voice_acting_mode = new VOICE_ACTING_MODE();
 
     mode->GetModeNames();
     this->box_mode_name->addItems(mode->mode_names); //загрзука названий режимов
@@ -482,7 +482,7 @@ void PRINT_WINDOW_LOGIC::LdFieldTextChanged(QString current_word){
                     sounds->Play(sounds->print_error); //звук ошибки
                     is_mistake = true;
                     first_time = false;
-                    if(!errors_mode) training_mode->MistakeReader(edit_text, letter); // для анализа ошибок
+                    if(!errors_mode) mode->MistakeReader(edit_text, letter); // для анализа ошибок
                     AlterMistakesText(edit_text[letter],current_word[letter - line_size]); //выделение ошибки в mistakes_text после тренировки
                 }
 
@@ -498,13 +498,13 @@ void PRINT_WINDOW_LOGIC::LdFieldTextChanged(QString current_word){
                 line_size = letter;
 
                 if(!errors_mode){
-                    training_mode->WordSpeedReader(ld_game_pole->text(),ld_game_pole->text().length()-1,abs(end_ms-start_ms)); //передаем длину слова и время написания его в мс
+                    mode->WordSpeedReader(ld_game_pole->text(),ld_game_pole->text().length()-1,abs(end_ms-start_ms)); //передаем длину слова и время написания его в мс
                     start_writing = true;                                               // length()-1, чтобы пробел не учитывать
                 }
 
                 ld_game_pole->clear();
             }else if(edit_text.length() - 1 == letter){
-                if(!errors_mode) training_mode->WordSpeedReader(ld_game_pole->text()+" ",ld_game_pole->text().length(),abs(end_ms-start_ms)); // добавляю здесь " ", так как в другой функции
+                if(!errors_mode) mode->WordSpeedReader(ld_game_pole->text()+" ",ld_game_pole->text().length(),abs(end_ms-start_ms)); // добавляю здесь " ", так как в другой функции
             }                                                                                       //всегда удаляю пробел, а в конце строки его нет
 
             if(edit_text.length() -1  == letter){ //проверка на конец текста, -2 так как в конце каждой строки есть символ перехода на новую
@@ -542,23 +542,21 @@ void PRINT_WINDOW_LOGIC::LdFieldTextChanged(QString current_word){
 void PRINT_WINDOW_LOGIC::BoxModeNamesCurrentIndexChanged(int){
     box_training_name->clear();//очищаем box
     but_start->setEnabled(true); // это если кнопка была заблочена, когда книга пройдена
+
     if(box_mode_name->currentText() == "text acting"){
         but_voice_settings->setVisible(true);
-        //this->chbox_use_texts_from_other_modes->setVisible(true);
-        //this->lab_use_question->setVisible(true);
+        mode->GetTrainingNames("training");
     }else{
         but_voice_settings->setVisible(false);
 
         mode->GetTrainingNames(this->box_mode_name->currentText()); //получаем имена тренировок по режиму
-
-        box_training_name->addItems(mode->training_names); //добавляем имена в box
-        mode->GetStatistics(box_mode_name->currentText(),box_training_name->currentText());//получаем статистику по тренировке
-        mode->ClearStatisticsContainers(); //очистках контейнеров с ошибками для добавления ошибок по загружаемой тренировке
-        mode->UpdateStatisticsContainers(box_mode_name->currentText(),box_training_name->currentText());
-        //this->chbox_use_texts_from_other_modes->setVisible(false);
-        //this->lab_use_question->setVisible(false);
-        //if(voice_acting_mode != nullptr) delete voice_acting_mode;
     }
+
+    box_training_name->addItems(mode->training_names); //добавляем имена в box
+    mode->GetStatistics(box_mode_name->currentText(),box_training_name->currentText());//получаем статистику по тренировке
+    mode->UpdateStatisticsContainers(box_mode_name->currentText(),box_training_name->currentText());
+
+    mode->ClearStatisticsContainers(); //очистках контейнеров с ошибками для добавления ошибок по загружаемой тренировке
 
     OnUpdateData();//обновление данных на поле
 }
@@ -577,6 +575,7 @@ void PRINT_WINDOW_LOGIC::ButStartClicked(){
     if(text_browser->toPlainText() == ""){ //если браузер пуст, значит тренировка не загрузилась
         text_browser->insertPlainText("Ошибка, тренировка не загрузилась или она не содержит текста!");
         ld_game_pole->setEnabled(false);
+        but_start->setEnabled(false);
     }
     else{
         ld_game_pole->setEnabled(true); //обнуляем данные на форме временной статы
@@ -616,8 +615,17 @@ void PRINT_WINDOW_LOGIC::ButLoadTrainingClicked(){
     text_browser->clear();
     mistakes_text = ""; //нужно обнулить, чтобы старые ошибки не отображались
     text_mistakes_browser->clear();
-    text_mistakes_browser->setVisible(false);
-    text_browser->insertPlainText(training_mode->GetTraining(box_mode_name->currentText(),box_training_name->currentText()));
+   // text_mistakes_browser->setVisible(false);
+
+    if(box_mode_name->currentText() == "training" || box_mode_name->currentText() == "text acting"){
+        QString training_text = training_mode->GetTraining("training",box_training_name->currentText());
+        if(training_text == "Нет слов в данной тренировке!")
+            but_start->setEnabled(false); //если тренировка не создастся, но ее нельзя запускать
+
+        voice_acting_mode->SetPlayingText(training_text);
+        text_browser->insertPlainText(training_text);
+        text_mistakes_browser->setVisible(true);
+    }
     edit_text = text_browser->toPlainText();
     but_start->setEnabled(true);
 }
@@ -819,7 +827,11 @@ void PRINT_WINDOW_LOGIC::BoxTrainingCurrentIndexChanged(int){
     mode->ClearStatisticsContainers();
     mode->UpdateStatisticsContainers(box_mode_name->currentText(),box_training_name->currentText());
 
-
+    if(but_hide_group_plot->isVisible()){
+        ld_plot_value->clear();
+        delete tracer;
+        ButShowGroupPlotClicked();
+    }
 }
 ////////////////////////////////////////////////////////////////////////
 ///////////PRINT_WINDOW_LOGIC::BoxTrainingCurrentIndexChanged///////////
@@ -954,24 +966,6 @@ void PRINT_WINDOW_LOGIC::PlotMouseMove(QMouseEvent *event){
 }
 ///////////////////////////////////////////////////////////////////////
 //////////////////PRINT_WINDOW_LOGIC::PlotMouseMove////////////////////
-///////////////////////////////////////////////////////////////////////
-
-
-
-///////////////////////////////////////////////////////////////////////
-///////PRINT_WINDOW_LOGIC::CHBoxUseTextsFromOtherModesChecked//////////
-///////////////////////////////////////////////////////////////////////
-void PRINT_WINDOW_LOGIC::CHBoxUseTextsFromOtherModesChecked(){
-
-//    if(chbox_use_texts_from_other_modes->isChecked()){
-//        for(auto it = mode->mode_names.begin(); it!=mode->mode_names.end();++it){
-//            if(*it == "text acting" ) continue;
-
-//        }
-//    }
-}
-///////////////////////////////////////////////////////////////////////
-///////PRINT_WINDOW_LOGIC::CHBoxUseTextsFromOtherModesChecked//////////
 ///////////////////////////////////////////////////////////////////////
 
 
@@ -1120,6 +1114,7 @@ void PRINT_WINDOW_LOGIC::OnTime(){
 void PRINT_WINDOW_LOGIC::OnPauseTime(){
       if(pause_time<=0){
         pause_timer->stop();
+        if(box_mode_name->currentText() == "text acting") voice_acting_mode->Speak(); //если выбран режим озвучки, то когда пауза заканчивается начинается озвучка
         timer->start(10);//обновляется каждые 100мс
         ld_game_pole->setReadOnly(false);
         ld_game_pole->setFocus();

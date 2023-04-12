@@ -10,7 +10,7 @@ class CHART;
 
 class QDate;
 
-#define TOTAL_WORDS_PER_LEVEL 60
+#define TOTAL_WORDS_PER_LEVEL 10
 
 class MODE{
     //Q_OBJECT

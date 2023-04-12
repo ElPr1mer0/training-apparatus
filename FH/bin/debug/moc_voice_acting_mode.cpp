@@ -22,8 +22,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_VOICE_ACTING_MODE_t {
-    QByteArrayData data[13];
-    char stringdata0[127];
+    QByteArrayData data[14];
+    char stringdata0[142];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -44,13 +44,14 @@ QT_MOC_LITERAL(8, 78, 6), // "volume"
 QT_MOC_LITERAL(9, 85, 11), // "SetLanguage"
 QT_MOC_LITERAL(10, 97, 8), // "language"
 QT_MOC_LITERAL(11, 106, 13), // "LocaleChanged"
-QT_MOC_LITERAL(12, 120, 6) // "locale"
+QT_MOC_LITERAL(12, 120, 6), // "locale"
+QT_MOC_LITERAL(13, 127, 14) // "ButTestClicked"
 
     },
     "VOICE_ACTING_MODE\0SetVoiceSettingsWindow\0"
     "\0Speak\0Stop\0SetSpeed\0speed\0SetVolume\0"
     "volume\0SetLanguage\0language\0LocaleChanged\0"
-    "locale"
+    "locale\0ButTestClicked"
 };
 #undef QT_MOC_LITERAL
 
@@ -60,7 +61,7 @@ static const uint qt_meta_data_VOICE_ACTING_MODE[] = {
        8,       // revision
        0,       // classname
        0,    0, // classinfo
-       7,   14, // methods
+       8,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -68,13 +69,14 @@ static const uint qt_meta_data_VOICE_ACTING_MODE[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    0,   49,    2, 0x0a /* Public */,
-       3,    0,   50,    2, 0x0a /* Public */,
-       4,    0,   51,    2, 0x0a /* Public */,
-       5,    1,   52,    2, 0x0a /* Public */,
-       7,    1,   55,    2, 0x0a /* Public */,
-       9,    1,   58,    2, 0x0a /* Public */,
-      11,    1,   61,    2, 0x0a /* Public */,
+       1,    0,   54,    2, 0x0a /* Public */,
+       3,    0,   55,    2, 0x0a /* Public */,
+       4,    0,   56,    2, 0x0a /* Public */,
+       5,    1,   57,    2, 0x0a /* Public */,
+       7,    1,   60,    2, 0x0a /* Public */,
+       9,    1,   63,    2, 0x0a /* Public */,
+      11,    1,   66,    2, 0x0a /* Public */,
+      13,    0,   69,    2, 0x08 /* Private */,
 
  // slots: parameters
     QMetaType::Void,
@@ -84,6 +86,7 @@ static const uint qt_meta_data_VOICE_ACTING_MODE[] = {
     QMetaType::Void, QMetaType::Int,    8,
     QMetaType::Void, QMetaType::Int,   10,
     QMetaType::Void, QMetaType::QLocale,   12,
+    QMetaType::Void,
 
        0        // eod
 };
@@ -101,6 +104,7 @@ void VOICE_ACTING_MODE::qt_static_metacall(QObject *_o, QMetaObject::Call _c, in
         case 4: _t->SetVolume((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 5: _t->SetLanguage((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 6: _t->LocaleChanged((*reinterpret_cast< const QLocale(*)>(_a[1]))); break;
+        case 7: _t->ButTestClicked(); break;
         default: ;
         }
     }
@@ -135,13 +139,13 @@ int VOICE_ACTING_MODE::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 7)
+        if (_id < 8)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 7;
+        _id -= 8;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 7)
+        if (_id < 8)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 7;
+        _id -= 8;
     }
     return _id;
 }

@@ -167,7 +167,7 @@ void MODE::GetWordsSpeed(const QString &mode_name,const QString &training_name){
 ////////////////////////////////////////////////////////////////////////
 /// получает данные статистики за время (для графиков)
 void MODE::GetStatisticsPerTime(const QString &mode_name, const QString &training_name){
-    db->LoadStatisticsPerTime(mode_name, training_name,statistics_per_time,2022);//date->currentDate().year() НУЖНО ИСПРАВИТЬ, ЧТОБЫ ВЫБИРАЛАСЬ ДАТА
+    db->LoadStatisticsPerTime(mode_name, training_name,statistics_per_time);//date->currentDate().year() НУЖНО ИСПРАВИТЬ, ЧТОБЫ ВЫБИРАЛАСЬ ДАТА
 }
 ////////////////////////////////////////////////////////////////////////
 ////////////////////MODE::GetStatisticsPerTime//////////////////////////
@@ -389,9 +389,9 @@ void MODE::UpdateStatisticsPerTime(const QString &mode_name, const QString &trai
         if(it->year == date->currentDate().year())
             if(it->month == date->currentDate().month())
                 if(it->day == date->currentDate().day()){
-                    it->mistakes = (it->mistakes*it->amount+current_mistakes)/(it->amount+1);
+                    it->mistakes = round(100*(it->mistakes*it->amount+current_mistakes)/(it->amount+1))/100;
                     it->speed = (it->speed*it->amount+current_speed)/(it->amount+1);
-                    ++it->amount; //если обновили элемент, то его нужно перезаписать в бд после этого
+                    it->amount += 1; //если обновили элемент, то его нужно перезаписать в бд после этого
                     db->SendStatisticsPerTime(mode_name, training_name,it->year, it->month, it->day, it->speed, it->amount, it->mistakes);
                     is_update = true;
                     qDebug()<<"Статистика за этот день уже есть, обновляем! ";

@@ -27,18 +27,22 @@ private:
     QSlider *sl_volume = nullptr;
     QSlider *sl_speed = nullptr;
 
-    QPushButton *but_play = nullptr;
-    QPushButton *but_stop = nullptr;
+    QPushButton *but_test = nullptr;
 
     QComboBox *box_language = nullptr;
-
-    QTextBrowser *text_browser = nullptr;
 
     QTextToSpeech *speech = nullptr;
 
     TRAINING_MODE *training_mode = nullptr;
+    QString text = "";
+
+    QTimer *pause_timer = nullptr; //пауза перед озвучкой текста
+    int min = 0, sec = 0, ms = 0; //
+    int pause_time = 0;
+
 public:
-    VOICE_ACTING_MODE(QTextBrowser *text_browser, DB *db);
+    VOICE_ACTING_MODE();
+    void SetPlayingText(const QString &text);
 
 public slots:
     void SetVoiceSettingsWindow();
@@ -51,6 +55,9 @@ public slots:
     void SetLanguage(int language);
 
     void LocaleChanged(const QLocale &locale);
+
+private slots:
+    void ButTestClicked();
 };
 
 #endif // VOICE_ACTING_MODE_H

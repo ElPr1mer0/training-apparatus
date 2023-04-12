@@ -249,14 +249,14 @@ void DB::LoadStatisticsPerTime(const QString &mode_name, const QString &training
 
     if(Query("SELECT * FROM statistics_per_time "
             "WHERE id = "+ QString::number(user_id)+" AND training_name = '"+ training_name +"' AND "
-            "mode_name = '"+mode_name+"' AND year = "+ QString::number(year))){
+            "mode_name = '"+mode_name+"' AND year >= "+ QString::number(year))){
 
         if(!record_exist) qDebug()<<"За этот период ничего нет!";
         else{
             query = new QSqlQuery(*db);
             query->exec("SELECT * FROM statistics_per_time "
                         "WHERE id = "+ QString::number(user_id)+" AND training_name = '"+ training_name +"' AND "
-                        "mode_name = '"+mode_name+"' AND year = "+ QString::number(year));
+                        "mode_name = '"+mode_name+"' AND year >= "+ QString::number(year));
             while(query->next()){
                 CHART chart;
                 chart.speed = query->value("speed").toInt();
@@ -380,7 +380,7 @@ void DB::SendStatisticsPerTime(const QString &mode_name, const QString &training
            "WHERE id = " +QString::number(user_id)+" AND mode_name = '"+mode_name+"' AND training_name = '"+training_name +"' "
            "AND year = "+QString::number(year)+" AND month = "+QString::number(month)+" AND day = "+QString::number(day)))
         qDebug()<<"Данные за сегодня обновлены!";
-        else qDebug()<<"Ошибка обновления таблицы!";
+        else qDebug()<<"SendStatisticsPerTime::Ошибка обновления таблицы!";
 
     }
     delete query;

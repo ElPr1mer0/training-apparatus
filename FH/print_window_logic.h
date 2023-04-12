@@ -160,7 +160,6 @@ private slots:
     void PlotMousePress(QMouseEvent *);
     void PlotMouseMove(QMouseEvent *);
 
-    void CHBoxUseTextsFromOtherModesChecked();
     void CHBoxSpeedChecked();
     void CHBoxMistakeChecked();
     void CHBoxAmountTextChecked();

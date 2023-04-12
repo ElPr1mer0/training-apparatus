@@ -1,5 +1,4 @@
 #include "voice_acting_mode.h"
-#include "training_mode.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -18,31 +17,21 @@
 /// Передает туда указатель на базу данных для взаимодействия с ней,
 /// также получает указатель текстового поля, текст которого будет
 /// озвучиваться
-VOICE_ACTING_MODE::VOICE_ACTING_MODE(QTextBrowser *text_browser, DB *db){
+VOICE_ACTING_MODE::VOICE_ACTING_MODE(){//
     VOICE_ACTING_MODE::windowTitle();
-    training_mode = new TRAINING_MODE(db);
-    this->text_browser = text_browser;
-}
-////////////////////////////////////////////////////////////////////////
-////////////////VOICE_ACTING_MODE::VOICE_ACTING_MODE////////////////////
-////////////////////////////////////////////////////////////////////////
 
-
-
-////////////////////////////////////////////////////////////////////////
-////////////VOICE_ACTING_MODE::SetVoiceSettingsWindow///////////////////
-////////////////////////////////////////////////////////////////////////
-/// создает окно настройки озвучки речи, соединяет слоты с сигналами,
-/// добавляет доступные языки для озвучки текста в бокс
-void VOICE_ACTING_MODE::SetVoiceSettingsWindow(){
+    speech = new QTextToSpeech();
     v_main_l = new QVBoxLayout;
     VOICE_ACTING_MODE::setLayout(v_main_l);
+    setWindowTitle("Настройка озвучки");
+    setFixedSize(300,150);
 
     QHBoxLayout *h_volume_l = new QHBoxLayout;
     v_main_l->addLayout(h_volume_l);
     lab_volume = new QLabel("Громкость");
     sl_volume = new QSlider(Qt::Horizontal);
     sl_volume->setRange(0,100);
+    sl_volume->setValue(60);
     sl_volume->setTickInterval(1);
 
     h_volume_l->addWidget(lab_volume);
@@ -53,6 +42,7 @@ void VOICE_ACTING_MODE::SetVoiceSettingsWindow(){
     lab_speed = new QLabel("Скорость");
     sl_speed = new QSlider(Qt::Horizontal);
     sl_speed->setRange(-100,100);
+    sl_speed->setValue(-60);
     sl_speed->setTickInterval(2);
     h_speed_l->addWidget(lab_speed);
     h_speed_l->addWidget(sl_speed);
@@ -66,21 +56,15 @@ void VOICE_ACTING_MODE::SetVoiceSettingsWindow(){
 
     QHBoxLayout *h_buttons_l = new QHBoxLayout;
     v_main_l->addLayout(h_buttons_l);
-    but_play = new QPushButton("Включить");
-    but_stop = new QPushButton("Выключить");
-    h_buttons_l->addWidget(but_play);
-    h_buttons_l->addWidget(but_stop);
+    but_test = new QPushButton("тест");
+    h_buttons_l->addWidget(but_test);
 
-
-    connect(but_play, &QPushButton::clicked, this, &VOICE_ACTING_MODE::Speak);
+    connect(but_test, &QPushButton::clicked, this, &VOICE_ACTING_MODE::ButTestClicked);
     connect(sl_speed, &QSlider::valueChanged, this, &VOICE_ACTING_MODE::SetSpeed);
     connect(sl_volume, &QSlider::valueChanged, this, &VOICE_ACTING_MODE::SetVolume);
 
-    speech = new QTextToSpeech(this);
-
     SetSpeed(sl_speed->value());
     SetVolume(sl_volume->value());
-    connect(but_stop, &QPushButton::clicked, this, &VOICE_ACTING_MODE::Stop);
 
     connect(speech, &QTextToSpeech::localeChanged, this, &VOICE_ACTING_MODE::LocaleChanged);
 
@@ -96,6 +80,25 @@ void VOICE_ACTING_MODE::SetVoiceSettingsWindow(){
             current = locale;
     }
     LocaleChanged(current);
+
+}
+
+void VOICE_ACTING_MODE::SetPlayingText(const QString &text){
+    this->text = text;
+}
+////////////////////////////////////////////////////////////////////////
+////////////////VOICE_ACTING_MODE::VOICE_ACTING_MODE////////////////////
+////////////////////////////////////////////////////////////////////////
+
+
+
+////////////////////////////////////////////////////////////////////////
+////////////VOICE_ACTING_MODE::SetVoiceSettingsWindow///////////////////
+////////////////////////////////////////////////////////////////////////
+/// создает окно настройки озвучки речи, соединяет слоты с сигналами,
+/// добавляет доступные языки для озвучки текста в бокс
+void VOICE_ACTING_MODE::SetVoiceSettingsWindow(){
+
     VOICE_ACTING_MODE::show();
 }
 ////////////////////////////////////////////////////////////////////////
@@ -109,7 +112,7 @@ void VOICE_ACTING_MODE::SetVoiceSettingsWindow(){
 ////////////////////////////////////////////////////////////////////////
 /// запускает озвучку
 void VOICE_ACTING_MODE::Speak(){
-    speech->say(text_browser->toPlainText());
+    speech->say(text);
 }
 ////////////////////////////////////////////////////////////////////////
 //////////////////////VOICE_ACTING_MODE::Speak//////////////////////////
@@ -180,4 +183,23 @@ void VOICE_ACTING_MODE::LocaleChanged(const QLocale &locale){
 }
 ////////////////////////////////////////////////////////////////////////
 //////////////////VOICE_ACTING_MODE::LocaleChanged//////////////////////
+////////////////////////////////////////////////////////////////////////
+
+
+
+////////////////////////////////////////////////////////////////////////
+//////////////////VOICE_ACTING_MODE::ButTestClicked/////////////////////
+////////////////////////////////////////////////////////////////////////
+/// для теста скорости и громкости озвучки
+void VOICE_ACTING_MODE::ButTestClicked(){
+    if(box_language->currentText() == "Russian (Russia)"){
+        SetPlayingText("Это русский текст для оценки скорости и звука настраиваемой озвучки!");
+        Speak();
+    }else{
+        SetPlayingText("This is english text to evaluate the speed and sound of custom voice acting!");
+        Speak();
+    }
+}
+////////////////////////////////////////////////////////////////////////
+//////////////////VOICE_ACTING_MODE::ButTestClicked/////////////////////
 ////////////////////////////////////////////////////////////////////////
