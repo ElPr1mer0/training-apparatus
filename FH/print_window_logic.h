@@ -26,6 +26,7 @@ class PRINT_WINDOW_LOGIC: public QWidget{
     Q_OBJECT
 
 private:
+    QPushButton *but_lost = nullptr;
     QPushButton *but_voice_settings = nullptr;
     QPushButton *but_start = nullptr; // в освновном окне print_window
     QPushButton *but_load_training = nullptr;
@@ -116,11 +117,11 @@ private:
     bool errors_mode = false;
 
 public:
-    PRINT_WINDOW_LOGIC(QPushButton *,QPushButton *, QPushButton *,QComboBox *, QComboBox *, QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *,
-                       QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *,QTextBrowser *, QTextBrowser *,
-                       QLabel*, QPushButton *, QPushButton *, QPushButton *, QCustomPlot *, QPushButton *,QComboBox *,
-                       QComboBox *, QComboBox *, QComboBox *, QGroupBox *, QLineEdit *, QGroupBox *, QCheckBox *,
-                       QCheckBox *, QCheckBox *, QCheckBox *, QCheckBox *, QCheckBox * , QCheckBox *, QPushButton *,
+    PRINT_WINDOW_LOGIC(QPushButton *,QPushButton *,QPushButton *, QPushButton *,QComboBox *, QComboBox *, QLineEdit *, QLineEdit *,
+                       QLineEdit *, QLineEdit *,QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *,
+                       QTextBrowser *, QTextBrowser *,QLabel*, QPushButton *, QPushButton *, QPushButton *, QCustomPlot *,
+                       QPushButton *,QComboBox *,QComboBox *, QComboBox *, QComboBox *, QGroupBox *, QLineEdit *, QGroupBox *,
+                       QCheckBox *, QCheckBox *, QCheckBox *, QCheckBox *, QCheckBox *, QCheckBox * , QCheckBox *, QPushButton *,
                        QGroupBox *, QPushButton *);
 
     ~PRINT_WINDOW_LOGIC();
@@ -146,7 +147,7 @@ private slots:
     void ButHideGroupPlotClicked();
     void ButShowWordStatistic();
     void ButCreateErrorsTrainingClicked();
-    void ButVoiceSettingsClicked();
+    void ButLostClicked();
 
     void LdFieldTextChanged(QString);
 

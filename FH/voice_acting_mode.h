@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QTextToSpeech>
 
+#define TEXT_ACTING "text acting"
+
 class TRAINING_MODE;
 class DB;
 class QComboBox;
@@ -16,7 +18,8 @@ class QVBoxLayout;
 class VOICE_ACTING_MODE : public QWidget{
     Q_OBJECT
 public:
-
+    int pause_time_between_words = 1000;//время(в мс), которые будет ожидать пользователем после каждого озвученного слова
+    QList <QString> acting_words; // сборник слов для озвучки пословно
 private:
     QVBoxLayout *v_main_l = nullptr;
 
@@ -34,15 +37,17 @@ private:
     QTextToSpeech *speech = nullptr;
 
     TRAINING_MODE *training_mode = nullptr;
-    QString text = "";
+    QString text = ""; 
 
     QTimer *pause_timer = nullptr; //пауза перед озвучкой текста
-    int min = 0, sec = 0, ms = 0; //
-    int pause_time = 0;
+    int sec = 0, ms = 0; //
 
 public:
     VOICE_ACTING_MODE();
     void SetPlayingText(const QString &text);
+
+private:
+
 
 public slots:
     void SetVoiceSettingsWindow();
@@ -57,6 +62,7 @@ public slots:
     void LocaleChanged(const QLocale &locale);
 
 private slots:
+    void OnPauseTime();
     void ButTestClicked();
 };
 

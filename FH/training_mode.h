@@ -5,6 +5,7 @@
 
 
 #define SYMBOLS_LIMIT 10000
+#define TRAINING "training"
 
 class TRAINING_MODE: public MODE{
 

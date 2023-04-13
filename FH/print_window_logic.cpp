@@ -16,7 +16,7 @@
 /// получает созданные виджеты и связывает их для последующей обработ-
 /// ки взаимодействий с ними на форме, соединяет слоты со сигналами
 /// этих объектов и подгружает стартовые данные по тренировке
-PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_voice_settings,QPushButton *but_start, QPushButton *but_load_training,QComboBox *box_mode_name, QComboBox *box_training_name,
+PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_lost, QPushButton *but_voice_settings,QPushButton *but_start, QPushButton *but_load_training,QComboBox *box_mode_name, QComboBox *box_training_name,
  QLineEdit *ld_game_pole, QLineEdit *ld_current_mistakes, QLineEdit *ld_current_speed, QLineEdit *ld_text_amount,
  QLineEdit *ld_record, QLineEdit *ld_average_speed, QLineEdit *ld_mistakes, QLineEdit *ld_all_time,
  QLineEdit *ld_current_min, QLineEdit *ld_current_sec,QTextBrowser *text_mistakes_browser, QTextBrowser *text_browser, QLabel* lab_current_mistakes,
@@ -26,6 +26,7 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_voice_settings,QPushButt
  QCheckBox *chbox_amount_text, QCheckBox *chbox_speed, QCheckBox *chbox_mistake, QCheckBox *chbox_letter_errors,
  QCheckBox *chbox_syllable_errors, QCheckBox *chbox_word_errors , QCheckBox *chbox_words_speed,
  QPushButton *but_show_word_statistic, QGroupBox *group_report, QPushButton *but_create_errors_training){
+    this->but_lost = but_lost;
     this->but_voice_settings = but_voice_settings;
     this->but_start = but_start;
     this->but_load_training = but_load_training;
@@ -77,6 +78,7 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_voice_settings,QPushButt
     this->ld_game_pole->setEnabled(false);
 
     this->but_start->setEnabled(false);
+    this->but_lost->setVisible(false);
     this->but_voice_settings->setVisible(false);
 
     this->box_training_name->clear();
@@ -109,7 +111,7 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_voice_settings,QPushButt
     connect(this->box_to_month,SIGNAL(currentIndexChanged(int)),this,SLOT(BoxToMonthCurrentIndexChanged(int)));
 
 
-    connect(this->but_voice_settings, SIGNAL(clicked()),voice_acting_mode,SLOT(SetVoiceSettingsWindow()));
+    connect(this->but_lost, SIGNAL(clicked()),this,SLOT(ButLostClicked()));
     connect(this->but_load_training, SIGNAL(clicked()),this,SLOT(ButLoadTrainingClicked()));
     connect(this->but_start, SIGNAL(clicked()),this, SLOT(ButStartClicked()));
     connect(this->but_show_group_plot, SIGNAL(clicked()),this,SLOT(ButShowGroupPlotClicked()));
@@ -498,14 +500,18 @@ void PRINT_WINDOW_LOGIC::LdFieldTextChanged(QString current_word){
                 line_size = letter;
 
                 if(!errors_mode){
+                    if(box_mode_name->currentText() == TEXT_ACTING) end_ms -= voice_acting_mode->pause_time_between_words;
                     mode->WordSpeedReader(ld_game_pole->text(),ld_game_pole->text().length()-1,abs(end_ms-start_ms)); //передаем длину слова и время написания его в мс
                     start_writing = true;                                               // length()-1, чтобы пробел не учитывать
                 }
 
                 ld_game_pole->clear();
             }else if(edit_text.length() - 1 == letter){
-                if(!errors_mode) mode->WordSpeedReader(ld_game_pole->text()+" ",ld_game_pole->text().length(),abs(end_ms-start_ms)); // добавляю здесь " ", так как в другой функции
-            }                                                                                       //всегда удаляю пробел, а в конце строки его нет
+                if(!errors_mode){
+                    if(box_mode_name->currentText() == TEXT_ACTING) end_ms -= voice_acting_mode->pause_time_between_words;
+                    mode->WordSpeedReader(ld_game_pole->text()+" ",ld_game_pole->text().length(),abs(end_ms-start_ms)); // добавляю здесь " ", так как в другой функции
+                }                                                                                           //всегда удаляю пробел, а в конце строки его нет
+            }
 
             if(edit_text.length() -1  == letter){ //проверка на конец текста, -2 так как в конце каждой строки есть символ перехода на новую
                                      //n, его нам считать не надо, и ещё -1 так как с нуля идет счет
@@ -543,11 +549,13 @@ void PRINT_WINDOW_LOGIC::BoxModeNamesCurrentIndexChanged(int){
     box_training_name->clear();//очищаем box
     but_start->setEnabled(true); // это если кнопка была заблочена, когда книга пройдена
 
-    if(box_mode_name->currentText() == "text acting"){
+    if(box_mode_name->currentText() == TEXT_ACTING){
         but_voice_settings->setVisible(true);
-        mode->GetTrainingNames("training");
+        but_lost->setVisible(true);
+        mode->GetTrainingNames(TRAINING);
     }else{
         but_voice_settings->setVisible(false);
+        but_lost->setVisible(false);
 
         mode->GetTrainingNames(this->box_mode_name->currentText()); //получаем имена тренировок по режиму
     }
@@ -616,17 +624,27 @@ void PRINT_WINDOW_LOGIC::ButLoadTrainingClicked(){
     mistakes_text = ""; //нужно обнулить, чтобы старые ошибки не отображались
     text_mistakes_browser->clear();
    // text_mistakes_browser->setVisible(false);
+    QString training_text;
 
-    if(box_mode_name->currentText() == "training" || box_mode_name->currentText() == "text acting"){
-        QString training_text = training_mode->GetTraining("training",box_training_name->currentText());
+    if(box_mode_name->currentText() == TRAINING || box_mode_name->currentText() == TEXT_ACTING){
+        training_text = training_mode->GetTraining(TRAINING,box_training_name->currentText());
         if(training_text == "Нет слов в данной тренировке!")
             but_start->setEnabled(false); //если тренировка не создастся, но ее нельзя запускать
 
-        voice_acting_mode->SetPlayingText(training_text);
-        text_browser->insertPlainText(training_text);
-        text_mistakes_browser->setVisible(true);
+        if(box_mode_name->currentText() == TEXT_ACTING){
+            voice_acting_mode->acting_words = training_text.split(" ");//полученную тренировку разделяем по словам
+            voice_acting_mode->acting_words.pop_back(); //удаляем последний элемент, так как там будет пусто из-за лишниго пробела
+            voice_acting_mode->SetPlayingText(voice_acting_mode->acting_words.front());
+            text_browser->setVisible(false);
+            text_mistakes_browser->setVisible(true);
+        }else{
+            text_browser->setVisible(true);
+            text_mistakes_browser->setVisible(false);
+        }
     }
-    edit_text = text_browser->toPlainText();
+
+    text_browser->insertPlainText(training_text);
+    edit_text = training_text;
     but_start->setEnabled(true);
 }
 ///////////////////////////////////////////////////////////////////////
@@ -803,14 +821,15 @@ void PRINT_WINDOW_LOGIC::ButCreateErrorsTrainingClicked(){
 
 
 ///////////////////////////////////////////////////////////////////////
-/////////////PRINT_WINDOW_LOGIC::ButVoiceSettingsClicked///////////////
+/////////////////PRINT_WINDOW_LOGIC::ButLostClicked////////////////////
 ///////////////////////////////////////////////////////////////////////
-/// вызывает меню настройки озвучки текста
-void PRINT_WINDOW_LOGIC::ButVoiceSettingsClicked(){
-
+/// когда человек сбился при наборе текста на слух, отображаем основной
+/// обзорщик текста, чтобы можно было донабрать то, что упустил
+void PRINT_WINDOW_LOGIC::ButLostClicked(){
+    text_browser->setVisible(true);
 }
 ///////////////////////////////////////////////////////////////////////
-/////////////PRINT_WINDOW_LOGIC::ButVoiceSettingsClicked///////////////
+/////////////////PRINT_WINDOW_LOGIC::ButLostClicked////////////////////
 ///////////////////////////////////////////////////////////////////////
 
 
@@ -1114,7 +1133,7 @@ void PRINT_WINDOW_LOGIC::OnTime(){
 void PRINT_WINDOW_LOGIC::OnPauseTime(){
       if(pause_time<=0){
         pause_timer->stop();
-        if(box_mode_name->currentText() == "text acting") voice_acting_mode->Speak(); //если выбран режим озвучки, то когда пауза заканчивается начинается озвучка
+        if(box_mode_name->currentText() == TEXT_ACTING) voice_acting_mode->Speak(); //если выбран режим озвучки, то когда пауза заканчивается начинается озвучка
         timer->start(10);//обновляется каждые 100мс
         ld_game_pole->setReadOnly(false);
         ld_game_pole->setFocus();
@@ -1129,8 +1148,6 @@ void PRINT_WINDOW_LOGIC::OnPauseTime(){
 ////////////////////////////////////////////////////////////////////////
 //////////////////PRINT_WINDOW_LOGIC::OnPauseTime///////////////////////
 ////////////////////////////////////////////////////////////////////////
-
-
 
 
 
@@ -1150,8 +1167,6 @@ void PRINT_WINDOW_LOGIC::OnUpdateData(){
 ////////////////////////////////////////////////////////////////////////
 /////////////////PRINT_WINDOW_LOGIC::OnUpdateData///////////////////////
 ////////////////////////////////////////////////////////////////////////
-
-
 
 
 
@@ -1208,14 +1223,20 @@ void PRINT_WINDOW_LOGIC::IsWin(){
     }
 
     errors_mode = false;
+
     but_load_training->setEnabled(true); // делаем доступными на форме
+
     ld_game_pole->setEnabled(false);
     ld_game_pole->clear();
+
     group_report->setEnabled(true);
+
     box_training_name->setEnabled(true);
     but_load_training->setEnabled(true);
-    text_browser->clear();
-    text_mistakes_browser->setVisible(true);
+
+    text_browser->clear();//очистка основного экрана
+
+    text_mistakes_browser->setVisible(true); //показываем экран с ошибками
     text_mistakes_browser->append(mistakes_text);
 }
 ////////////////////////////////////////////////////////////////////////

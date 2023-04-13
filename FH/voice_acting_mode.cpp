@@ -7,6 +7,7 @@
 #include <QSlider>
 #include <QPushButton>
 #include <QComboBox>
+#include <QTimer>
 
 
 ////////////////////////////////////////////////////////////////////////
@@ -81,13 +82,51 @@ VOICE_ACTING_MODE::VOICE_ACTING_MODE(){//
     }
     LocaleChanged(current);
 
+    pause_timer = new QTimer(this);
+    connect (pause_timer, SIGNAL(timeout()),this, SLOT(OnPauseTime()));
 }
+////////////////////////////////////////////////////////////////////////
+////////////////VOICE_ACTING_MODE::VOICE_ACTING_MODE////////////////////
+////////////////////////////////////////////////////////////////////////
 
+
+
+////////////////////////////////////////////////////////////////////////
+/////////////////VOICE_ACTING_MODE::SetPlayingText//////////////////////
+////////////////////////////////////////////////////////////////////////
+/// добавляет текст для озвучки в плеер
 void VOICE_ACTING_MODE::SetPlayingText(const QString &text){
     this->text = text;
 }
 ////////////////////////////////////////////////////////////////////////
-////////////////VOICE_ACTING_MODE::VOICE_ACTING_MODE////////////////////
+/////////////////VOICE_ACTING_MODE::SetPlayingText//////////////////////
+////////////////////////////////////////////////////////////////////////
+
+
+
+
+////////////////////////////////////////////////////////////////////////
+///////////////////VOICE_ACTING_MODE::OnPauseTime///////////////////////
+////////////////////////////////////////////////////////////////////////
+/// таймер ожидания паузы
+void VOICE_ACTING_MODE::OnPauseTime(){
+    ms+=100;
+    if(speech->state() != QTextToSpeech::Speaking)
+        if(ms >= pause_time_between_words){
+            acting_words.pop_front();
+            if(!acting_words.empty()){
+                SetPlayingText(acting_words.front());
+                pause_timer->stop();
+                Speak();
+            }else{
+                pause_timer->stop();
+                Stop();
+            }
+            ms = 0;
+        }
+}
+////////////////////////////////////////////////////////////////////////
+///////////////////VOICE_ACTING_MODE::OnPauseTime///////////////////////
 ////////////////////////////////////////////////////////////////////////
 
 
@@ -97,10 +136,7 @@ void VOICE_ACTING_MODE::SetPlayingText(const QString &text){
 ////////////////////////////////////////////////////////////////////////
 /// создает окно настройки озвучки речи, соединяет слоты с сигналами,
 /// добавляет доступные языки для озвучки текста в бокс
-void VOICE_ACTING_MODE::SetVoiceSettingsWindow(){
-
-    VOICE_ACTING_MODE::show();
-}
+void VOICE_ACTING_MODE::SetVoiceSettingsWindow(){ VOICE_ACTING_MODE::show();}
 ////////////////////////////////////////////////////////////////////////
 ////////////VOICE_ACTING_MODE::SetVoiceSettingsWindow///////////////////
 ////////////////////////////////////////////////////////////////////////
@@ -110,9 +146,11 @@ void VOICE_ACTING_MODE::SetVoiceSettingsWindow(){
 ////////////////////////////////////////////////////////////////////////
 //////////////////////VOICE_ACTING_MODE::Speak//////////////////////////
 ////////////////////////////////////////////////////////////////////////
-/// запускает озвучку
+/// запускает озвучку и таймер паузы между слов
 void VOICE_ACTING_MODE::Speak(){
     speech->say(text);
+    ms = 0;
+    pause_timer->start(100);
 }
 ////////////////////////////////////////////////////////////////////////
 //////////////////////VOICE_ACTING_MODE::Speak//////////////////////////
@@ -123,7 +161,7 @@ void VOICE_ACTING_MODE::Speak(){
 ////////////////////////////////////////////////////////////////////////
 //////////////////////VOICE_ACTING_MODE::Stop///////////////////////////
 ////////////////////////////////////////////////////////////////////////
-/// останавливает озвучку
+/// останавливает озвучку, удаляет таймер
 void VOICE_ACTING_MODE::Stop(){
     speech->stop();
 }
@@ -193,11 +231,9 @@ void VOICE_ACTING_MODE::LocaleChanged(const QLocale &locale){
 /// для теста скорости и громкости озвучки
 void VOICE_ACTING_MODE::ButTestClicked(){
     if(box_language->currentText() == "Russian (Russia)"){
-        SetPlayingText("Это русский текст для оценки скорости и звука настраиваемой озвучки!");
-        Speak();
+        speech->say("Это русский текст для оценки скорости и звука настраиваемой озвучки!");
     }else{
-        SetPlayingText("This is english text to evaluate the speed and sound of custom voice acting!");
-        Speak();
+        speech->say("This is english text to evaluate the speed and sound of custom voice acting!");
     }
 }
 ////////////////////////////////////////////////////////////////////////

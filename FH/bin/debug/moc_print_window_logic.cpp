@@ -23,7 +23,7 @@ QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_PRINT_WINDOW_LOGIC_t {
     QByteArrayData data[40];
-    char stringdata0[807];
+    char stringdata0[798];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -50,28 +50,28 @@ QT_MOC_LITERAL(14, 240, 23), // "ButShowGroupPlotClicked"
 QT_MOC_LITERAL(15, 264, 23), // "ButHideGroupPlotClicked"
 QT_MOC_LITERAL(16, 288, 20), // "ButShowWordStatistic"
 QT_MOC_LITERAL(17, 309, 30), // "ButCreateErrorsTrainingClicked"
-QT_MOC_LITERAL(18, 340, 23), // "ButVoiceSettingsClicked"
-QT_MOC_LITERAL(19, 364, 18), // "LdFieldTextChanged"
-QT_MOC_LITERAL(20, 383, 31), // "BoxModeNamesCurrentIndexChanged"
-QT_MOC_LITERAL(21, 415, 30), // "BoxTrainingCurrentIndexChanged"
-QT_MOC_LITERAL(22, 446, 30), // "BoxFromYearCurrentIndexChanged"
-QT_MOC_LITERAL(23, 477, 31), // "BoxFromMonthCurrentIndexChanged"
-QT_MOC_LITERAL(24, 509, 28), // "BoxToYearCurrentIndexChanged"
-QT_MOC_LITERAL(25, 538, 29), // "BoxToMonthCurrentIndexChanged"
-QT_MOC_LITERAL(26, 568, 14), // "PlotMousePress"
-QT_MOC_LITERAL(27, 583, 12), // "QMouseEvent*"
-QT_MOC_LITERAL(28, 596, 13), // "PlotMouseMove"
-QT_MOC_LITERAL(29, 610, 17), // "CHBoxSpeedChecked"
-QT_MOC_LITERAL(30, 628, 19), // "CHBoxMistakeChecked"
-QT_MOC_LITERAL(31, 648, 22), // "CHBoxAmountTextChecked"
-QT_MOC_LITERAL(32, 671, 24), // "CHBoxLetterErrorsChecked"
-QT_MOC_LITERAL(33, 696, 26), // "CHBoxSyllableErrorsChecked"
-QT_MOC_LITERAL(34, 723, 22), // "CHBoxWordErrorsChecked"
-QT_MOC_LITERAL(35, 746, 22), // "CHBoxWordsSpeedChecked"
-QT_MOC_LITERAL(36, 769, 5), // "IsWin"
-QT_MOC_LITERAL(37, 775, 6), // "OnTime"
-QT_MOC_LITERAL(38, 782, 11), // "OnPauseTime"
-QT_MOC_LITERAL(39, 794, 12) // "OnUpdateData"
+QT_MOC_LITERAL(18, 340, 14), // "ButLostClicked"
+QT_MOC_LITERAL(19, 355, 18), // "LdFieldTextChanged"
+QT_MOC_LITERAL(20, 374, 31), // "BoxModeNamesCurrentIndexChanged"
+QT_MOC_LITERAL(21, 406, 30), // "BoxTrainingCurrentIndexChanged"
+QT_MOC_LITERAL(22, 437, 30), // "BoxFromYearCurrentIndexChanged"
+QT_MOC_LITERAL(23, 468, 31), // "BoxFromMonthCurrentIndexChanged"
+QT_MOC_LITERAL(24, 500, 28), // "BoxToYearCurrentIndexChanged"
+QT_MOC_LITERAL(25, 529, 29), // "BoxToMonthCurrentIndexChanged"
+QT_MOC_LITERAL(26, 559, 14), // "PlotMousePress"
+QT_MOC_LITERAL(27, 574, 12), // "QMouseEvent*"
+QT_MOC_LITERAL(28, 587, 13), // "PlotMouseMove"
+QT_MOC_LITERAL(29, 601, 17), // "CHBoxSpeedChecked"
+QT_MOC_LITERAL(30, 619, 19), // "CHBoxMistakeChecked"
+QT_MOC_LITERAL(31, 639, 22), // "CHBoxAmountTextChecked"
+QT_MOC_LITERAL(32, 662, 24), // "CHBoxLetterErrorsChecked"
+QT_MOC_LITERAL(33, 687, 26), // "CHBoxSyllableErrorsChecked"
+QT_MOC_LITERAL(34, 714, 22), // "CHBoxWordErrorsChecked"
+QT_MOC_LITERAL(35, 737, 22), // "CHBoxWordsSpeedChecked"
+QT_MOC_LITERAL(36, 760, 5), // "IsWin"
+QT_MOC_LITERAL(37, 766, 6), // "OnTime"
+QT_MOC_LITERAL(38, 773, 11), // "OnPauseTime"
+QT_MOC_LITERAL(39, 785, 12) // "OnUpdateData"
 
     },
     "PRINT_WINDOW_LOGIC\0GetCreateTrainingComponents\0"
@@ -83,7 +83,7 @@ QT_MOC_LITERAL(39, 794, 12) // "OnUpdateData"
     "ButShowGroupPlotClicked\0ButHideGroupPlotClicked\0"
     "ButShowWordStatistic\0"
     "ButCreateErrorsTrainingClicked\0"
-    "ButVoiceSettingsClicked\0LdFieldTextChanged\0"
+    "ButLostClicked\0LdFieldTextChanged\0"
     "BoxModeNamesCurrentIndexChanged\0"
     "BoxTrainingCurrentIndexChanged\0"
     "BoxFromYearCurrentIndexChanged\0"
@@ -203,7 +203,7 @@ void PRINT_WINDOW_LOGIC::qt_static_metacall(QObject *_o, QMetaObject::Call _c, i
         case 9: _t->ButHideGroupPlotClicked(); break;
         case 10: _t->ButShowWordStatistic(); break;
         case 11: _t->ButCreateErrorsTrainingClicked(); break;
-        case 12: _t->ButVoiceSettingsClicked(); break;
+        case 12: _t->ButLostClicked(); break;
         case 13: _t->LdFieldTextChanged((*reinterpret_cast< QString(*)>(_a[1]))); break;
         case 14: _t->BoxModeNamesCurrentIndexChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 15: _t->BoxTrainingCurrentIndexChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
