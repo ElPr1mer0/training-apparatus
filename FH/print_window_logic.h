@@ -6,6 +6,7 @@
 
 class TRAINING_MODE;
 class MODE;
+class BOOK_MODE;
 class SOUNDS;
 class VOICE_ACTING_MODE;
 
@@ -26,6 +27,7 @@ class PRINT_WINDOW_LOGIC: public QWidget{
     Q_OBJECT
 
 private:
+    QPushButton *but_add_new_book = nullptr;
     QPushButton *but_lost = nullptr;
     QPushButton *but_voice_settings = nullptr;
     QPushButton *but_start = nullptr; // в освновном окне print_window
@@ -42,6 +44,7 @@ private:
     QPushButton *but_hide_group_plot = nullptr;
     QPushButton *but_create_errors_training = nullptr;
 
+    QLineEdit *ld_current_text = nullptr;
     QLineEdit *ld_training_name = nullptr; //доп окно create_training
     QLineEdit *ld_add_word = nullptr;
     QLineEdit *ld_current_symbols = nullptr;
@@ -62,6 +65,7 @@ private:
     QTextBrowser *browser_training_word = nullptr;
     QTextBrowser *text_mistakes_browser = nullptr;
 
+    QLabel *lab_current_text = nullptr;
     QLabel *lab_current_mistakes = nullptr;
     QLabel *lab_status = nullptr;
 
@@ -92,6 +96,7 @@ private:
     MODE *mode = nullptr;
     TRAINING_MODE *training_mode  = nullptr;
     VOICE_ACTING_MODE *voice_acting_mode = nullptr;
+    BOOK_MODE *book_mode = nullptr;
     SOUNDS *sounds = nullptr;
 
     QTimer *timer = nullptr; // для работы таймера
@@ -117,9 +122,9 @@ private:
     bool errors_mode = false;
 
 public:
-    PRINT_WINDOW_LOGIC(QPushButton *,QPushButton *,QPushButton *, QPushButton *,QComboBox *, QComboBox *, QLineEdit *, QLineEdit *,
+    PRINT_WINDOW_LOGIC(QPushButton *,QPushButton *,QPushButton *,QPushButton *, QPushButton *,QComboBox *, QComboBox *,QLineEdit *, QLineEdit *, QLineEdit *,
                        QLineEdit *, QLineEdit *,QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *, QLineEdit *,
-                       QTextBrowser *, QTextBrowser *,QLabel*, QPushButton *, QPushButton *, QPushButton *, QCustomPlot *,
+                       QTextBrowser *, QTextBrowser *,QLabel *,QLabel *, QPushButton *, QPushButton *, QPushButton *, QCustomPlot *,
                        QPushButton *,QComboBox *,QComboBox *, QComboBox *, QComboBox *, QGroupBox *, QLineEdit *, QGroupBox *,
                        QCheckBox *, QCheckBox *, QCheckBox *, QCheckBox *, QCheckBox *, QCheckBox * , QCheckBox *, QPushButton *,
                        QGroupBox *, QPushButton *);
@@ -140,7 +145,7 @@ private slots:
     void ButDeleteLastWordClicked();
     void ButDeleteWordClicked();
 
-
+    void ButAddNewBookClicked();
     void ButStartClicked(); //освновное окно
     void ButLoadTrainingClicked();
     void ButShowGroupPlotClicked();

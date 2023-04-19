@@ -338,8 +338,8 @@ void DB::SendAdditionalStatistics(const QString &mode_name,const QString &traini
 /// добавляет созданную пользователем тренировку в бд
 void DB::SendAddedTraining(const QString &mode_name, const QString &training_names){
     query = new QSqlQuery(*db);
-    if(query->exec("UPDATE added_mods set training_names = '"+training_names+"' "
-                   "WHERE id = " +QString::number(user_id)+" AND mode_name = '"+mode_name+"'")){
+    if(query->exec("INSERT INTO added_mods (id, mode_name, training_names) "
+                   "VALUES ("+QString::number(user_id)+",'"+mode_name+"', '"+ training_names+ "')")){
         qDebug()<<"Таблица имен обновлена!";
     }else qDebug()<<"Ошибка обновления таблицы!";
     delete query;
@@ -418,6 +418,64 @@ bool DB::CreateCustomTraining(const QString &mode_name, const QString &training_
 
 
 ////////////////////////////////////////////////////////////////////////
+///////////////////////DB::CreateCustomBook/////////////////////////////
+////////////////////////////////////////////////////////////////////////
+bool DB::CreateCustomBook(const QString &mode_name, const QString &training_name, const QList<QString> &content){
+    query = new QSqlQuery(*db);
+
+    QString *string = new QString;
+    for(auto it = content.begin(); it!= content.end();++it)
+        *string += *it;
+
+    if(query->exec("INSERT INTO mode(id, mode_name, training_name, content, people_added, play_counter)"
+                   "VALUES("+QString::number(user_id)+",'"+mode_name+"','"+training_name+"','"+string+"',1,0);")){//+""+ сразу вставляем пустую строку, так как потом в цикл
+
+        qDebug()<<"Тренировка сохранена успешно!";
+        delete query;
+        delete string;
+        return true;
+    }
+    qDebug()<<"Ошибка в сохранении тренировки!";
+    delete string;
+    delete query;
+    return false;
+}
+////////////////////////////////////////////////////////////////////////
+///////////////////////DB::CreateCustomBook/////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+
+
+////////////////////////////////////////////////////////////////////////
+///////////////////////DB::LoadBookTraining/////////////////////////////
+////////////////////////////////////////////////////////////////////////
+void DB::LoadBookTraining(const QString &mode_name,const QString &training_name, QList<QString> &content){
+    query = new QSqlQuery(*db);
+
+    if(query->exec("SELECT content FROM mode "
+                   "WHERE training_name = '"+training_name+"' "
+                   "AND mode_name = '"+mode_name+"'")){
+        QString *str = new QString;
+        while(query->next()) {
+            *str = query->value(0).toString();
+        }
+         content = str->split("\n");
+        //while(str->split("\n"))
+
+
+        delete str;
+        qDebug()<<"Тренировка загружена из базы данных!";
+    }
+    else qDebug()<<"Ошибка загрузки тренировки из базы данных!";
+    delete query;
+}
+////////////////////////////////////////////////////////////////////////
+///////////////////////DB::LoadBookTraining/////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+
+
+////////////////////////////////////////////////////////////////////////
 //////////////////////////DB::Registration//////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 /// проверяет корректность регистрационных данных, если все хорошо, то
@@ -490,7 +548,7 @@ bool DB::Query(QString query){
     this->record_exist = true;
 
     if(!this->query->exec(query)){ // проверяем на корректность запроса
-        qDebug()<<this->query->lastError().databaseText();
+        qDebug()<<this->query->lastError();
         delete this->query;
         return false;
     }

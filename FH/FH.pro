@@ -10,6 +10,7 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    book_mode.cpp \
     chat.cpp \
     db.cpp \
     main.cpp \
@@ -26,6 +27,7 @@ SOURCES += \
     client.cpp
 
 HEADERS += \
+    book_mode.h \
     chart.h \
     chat.h \
     db.h \

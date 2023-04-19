@@ -22,8 +22,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_PRINT_WINDOW_LOGIC_t {
-    QByteArrayData data[40];
-    char stringdata0[798];
+    QByteArrayData data[41];
+    char stringdata0[819];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -44,34 +44,35 @@ QT_MOC_LITERAL(8, 112, 17), // "ButAddWordClicked"
 QT_MOC_LITERAL(9, 130, 24), // "ButCreateTrainingClicked"
 QT_MOC_LITERAL(10, 155, 24), // "ButDeleteLastWordClicked"
 QT_MOC_LITERAL(11, 180, 20), // "ButDeleteWordClicked"
-QT_MOC_LITERAL(12, 201, 15), // "ButStartClicked"
-QT_MOC_LITERAL(13, 217, 22), // "ButLoadTrainingClicked"
-QT_MOC_LITERAL(14, 240, 23), // "ButShowGroupPlotClicked"
-QT_MOC_LITERAL(15, 264, 23), // "ButHideGroupPlotClicked"
-QT_MOC_LITERAL(16, 288, 20), // "ButShowWordStatistic"
-QT_MOC_LITERAL(17, 309, 30), // "ButCreateErrorsTrainingClicked"
-QT_MOC_LITERAL(18, 340, 14), // "ButLostClicked"
-QT_MOC_LITERAL(19, 355, 18), // "LdFieldTextChanged"
-QT_MOC_LITERAL(20, 374, 31), // "BoxModeNamesCurrentIndexChanged"
-QT_MOC_LITERAL(21, 406, 30), // "BoxTrainingCurrentIndexChanged"
-QT_MOC_LITERAL(22, 437, 30), // "BoxFromYearCurrentIndexChanged"
-QT_MOC_LITERAL(23, 468, 31), // "BoxFromMonthCurrentIndexChanged"
-QT_MOC_LITERAL(24, 500, 28), // "BoxToYearCurrentIndexChanged"
-QT_MOC_LITERAL(25, 529, 29), // "BoxToMonthCurrentIndexChanged"
-QT_MOC_LITERAL(26, 559, 14), // "PlotMousePress"
-QT_MOC_LITERAL(27, 574, 12), // "QMouseEvent*"
-QT_MOC_LITERAL(28, 587, 13), // "PlotMouseMove"
-QT_MOC_LITERAL(29, 601, 17), // "CHBoxSpeedChecked"
-QT_MOC_LITERAL(30, 619, 19), // "CHBoxMistakeChecked"
-QT_MOC_LITERAL(31, 639, 22), // "CHBoxAmountTextChecked"
-QT_MOC_LITERAL(32, 662, 24), // "CHBoxLetterErrorsChecked"
-QT_MOC_LITERAL(33, 687, 26), // "CHBoxSyllableErrorsChecked"
-QT_MOC_LITERAL(34, 714, 22), // "CHBoxWordErrorsChecked"
-QT_MOC_LITERAL(35, 737, 22), // "CHBoxWordsSpeedChecked"
-QT_MOC_LITERAL(36, 760, 5), // "IsWin"
-QT_MOC_LITERAL(37, 766, 6), // "OnTime"
-QT_MOC_LITERAL(38, 773, 11), // "OnPauseTime"
-QT_MOC_LITERAL(39, 785, 12) // "OnUpdateData"
+QT_MOC_LITERAL(12, 201, 20), // "ButAddNewBookClicked"
+QT_MOC_LITERAL(13, 222, 15), // "ButStartClicked"
+QT_MOC_LITERAL(14, 238, 22), // "ButLoadTrainingClicked"
+QT_MOC_LITERAL(15, 261, 23), // "ButShowGroupPlotClicked"
+QT_MOC_LITERAL(16, 285, 23), // "ButHideGroupPlotClicked"
+QT_MOC_LITERAL(17, 309, 20), // "ButShowWordStatistic"
+QT_MOC_LITERAL(18, 330, 30), // "ButCreateErrorsTrainingClicked"
+QT_MOC_LITERAL(19, 361, 14), // "ButLostClicked"
+QT_MOC_LITERAL(20, 376, 18), // "LdFieldTextChanged"
+QT_MOC_LITERAL(21, 395, 31), // "BoxModeNamesCurrentIndexChanged"
+QT_MOC_LITERAL(22, 427, 30), // "BoxTrainingCurrentIndexChanged"
+QT_MOC_LITERAL(23, 458, 30), // "BoxFromYearCurrentIndexChanged"
+QT_MOC_LITERAL(24, 489, 31), // "BoxFromMonthCurrentIndexChanged"
+QT_MOC_LITERAL(25, 521, 28), // "BoxToYearCurrentIndexChanged"
+QT_MOC_LITERAL(26, 550, 29), // "BoxToMonthCurrentIndexChanged"
+QT_MOC_LITERAL(27, 580, 14), // "PlotMousePress"
+QT_MOC_LITERAL(28, 595, 12), // "QMouseEvent*"
+QT_MOC_LITERAL(29, 608, 13), // "PlotMouseMove"
+QT_MOC_LITERAL(30, 622, 17), // "CHBoxSpeedChecked"
+QT_MOC_LITERAL(31, 640, 19), // "CHBoxMistakeChecked"
+QT_MOC_LITERAL(32, 660, 22), // "CHBoxAmountTextChecked"
+QT_MOC_LITERAL(33, 683, 24), // "CHBoxLetterErrorsChecked"
+QT_MOC_LITERAL(34, 708, 26), // "CHBoxSyllableErrorsChecked"
+QT_MOC_LITERAL(35, 735, 22), // "CHBoxWordErrorsChecked"
+QT_MOC_LITERAL(36, 758, 22), // "CHBoxWordsSpeedChecked"
+QT_MOC_LITERAL(37, 781, 5), // "IsWin"
+QT_MOC_LITERAL(38, 787, 6), // "OnTime"
+QT_MOC_LITERAL(39, 794, 11), // "OnPauseTime"
+QT_MOC_LITERAL(40, 806, 12) // "OnUpdateData"
 
     },
     "PRINT_WINDOW_LOGIC\0GetCreateTrainingComponents\0"
@@ -79,9 +80,9 @@ QT_MOC_LITERAL(39, 785, 12) // "OnUpdateData"
     "QTextBrowser*\0ButAddFileClicked\0"
     "ButAddWordClicked\0ButCreateTrainingClicked\0"
     "ButDeleteLastWordClicked\0ButDeleteWordClicked\0"
-    "ButStartClicked\0ButLoadTrainingClicked\0"
-    "ButShowGroupPlotClicked\0ButHideGroupPlotClicked\0"
-    "ButShowWordStatistic\0"
+    "ButAddNewBookClicked\0ButStartClicked\0"
+    "ButLoadTrainingClicked\0ButShowGroupPlotClicked\0"
+    "ButHideGroupPlotClicked\0ButShowWordStatistic\0"
     "ButCreateErrorsTrainingClicked\0"
     "ButLostClicked\0LdFieldTextChanged\0"
     "BoxModeNamesCurrentIndexChanged\0"
@@ -105,7 +106,7 @@ static const uint qt_meta_data_PRINT_WINDOW_LOGIC[] = {
        8,       // revision
        0,       // classname
        0,    0, // classinfo
-      33,   14, // methods
+      34,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -113,42 +114,44 @@ static const uint qt_meta_data_PRINT_WINDOW_LOGIC[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,   11,  179,    2, 0x0a /* Public */,
-       7,    0,  202,    2, 0x08 /* Private */,
-       8,    0,  203,    2, 0x08 /* Private */,
-       9,    0,  204,    2, 0x08 /* Private */,
-      10,    0,  205,    2, 0x08 /* Private */,
-      11,    0,  206,    2, 0x08 /* Private */,
-      12,    0,  207,    2, 0x08 /* Private */,
-      13,    0,  208,    2, 0x08 /* Private */,
-      14,    0,  209,    2, 0x08 /* Private */,
-      15,    0,  210,    2, 0x08 /* Private */,
-      16,    0,  211,    2, 0x08 /* Private */,
-      17,    0,  212,    2, 0x08 /* Private */,
-      18,    0,  213,    2, 0x08 /* Private */,
-      19,    1,  214,    2, 0x08 /* Private */,
-      20,    1,  217,    2, 0x08 /* Private */,
-      21,    1,  220,    2, 0x08 /* Private */,
-      22,    1,  223,    2, 0x08 /* Private */,
-      23,    1,  226,    2, 0x08 /* Private */,
-      24,    1,  229,    2, 0x08 /* Private */,
-      25,    1,  232,    2, 0x08 /* Private */,
-      26,    1,  235,    2, 0x08 /* Private */,
-      28,    1,  238,    2, 0x08 /* Private */,
-      29,    0,  241,    2, 0x08 /* Private */,
-      30,    0,  242,    2, 0x08 /* Private */,
-      31,    0,  243,    2, 0x08 /* Private */,
-      32,    0,  244,    2, 0x08 /* Private */,
-      33,    0,  245,    2, 0x08 /* Private */,
-      34,    0,  246,    2, 0x08 /* Private */,
-      35,    0,  247,    2, 0x08 /* Private */,
-      36,    0,  248,    2, 0x08 /* Private */,
-      37,    0,  249,    2, 0x08 /* Private */,
-      38,    0,  250,    2, 0x08 /* Private */,
-      39,    0,  251,    2, 0x08 /* Private */,
+       1,   11,  184,    2, 0x0a /* Public */,
+       7,    0,  207,    2, 0x08 /* Private */,
+       8,    0,  208,    2, 0x08 /* Private */,
+       9,    0,  209,    2, 0x08 /* Private */,
+      10,    0,  210,    2, 0x08 /* Private */,
+      11,    0,  211,    2, 0x08 /* Private */,
+      12,    0,  212,    2, 0x08 /* Private */,
+      13,    0,  213,    2, 0x08 /* Private */,
+      14,    0,  214,    2, 0x08 /* Private */,
+      15,    0,  215,    2, 0x08 /* Private */,
+      16,    0,  216,    2, 0x08 /* Private */,
+      17,    0,  217,    2, 0x08 /* Private */,
+      18,    0,  218,    2, 0x08 /* Private */,
+      19,    0,  219,    2, 0x08 /* Private */,
+      20,    1,  220,    2, 0x08 /* Private */,
+      21,    1,  223,    2, 0x08 /* Private */,
+      22,    1,  226,    2, 0x08 /* Private */,
+      23,    1,  229,    2, 0x08 /* Private */,
+      24,    1,  232,    2, 0x08 /* Private */,
+      25,    1,  235,    2, 0x08 /* Private */,
+      26,    1,  238,    2, 0x08 /* Private */,
+      27,    1,  241,    2, 0x08 /* Private */,
+      29,    1,  244,    2, 0x08 /* Private */,
+      30,    0,  247,    2, 0x08 /* Private */,
+      31,    0,  248,    2, 0x08 /* Private */,
+      32,    0,  249,    2, 0x08 /* Private */,
+      33,    0,  250,    2, 0x08 /* Private */,
+      34,    0,  251,    2, 0x08 /* Private */,
+      35,    0,  252,    2, 0x08 /* Private */,
+      36,    0,  253,    2, 0x08 /* Private */,
+      37,    0,  254,    2, 0x08 /* Private */,
+      38,    0,  255,    2, 0x08 /* Private */,
+      39,    0,  256,    2, 0x08 /* Private */,
+      40,    0,  257,    2, 0x08 /* Private */,
 
  // slots: parameters
     QMetaType::Void, 0x80000000 | 3, 0x80000000 | 3, 0x80000000 | 3, 0x80000000 | 3, 0x80000000 | 3, 0x80000000 | 4, 0x80000000 | 4, 0x80000000 | 4, 0x80000000 | 4, 0x80000000 | 5, 0x80000000 | 6,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,
+    QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
@@ -168,8 +171,8 @@ static const uint qt_meta_data_PRINT_WINDOW_LOGIC[] = {
     QMetaType::Void, QMetaType::Int,    2,
     QMetaType::Void, QMetaType::Int,    2,
     QMetaType::Void, QMetaType::Int,    2,
-    QMetaType::Void, 0x80000000 | 27,    2,
-    QMetaType::Void, 0x80000000 | 27,    2,
+    QMetaType::Void, 0x80000000 | 28,    2,
+    QMetaType::Void, 0x80000000 | 28,    2,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
@@ -197,33 +200,34 @@ void PRINT_WINDOW_LOGIC::qt_static_metacall(QObject *_o, QMetaObject::Call _c, i
         case 3: _t->ButCreateTrainingClicked(); break;
         case 4: _t->ButDeleteLastWordClicked(); break;
         case 5: _t->ButDeleteWordClicked(); break;
-        case 6: _t->ButStartClicked(); break;
-        case 7: _t->ButLoadTrainingClicked(); break;
-        case 8: _t->ButShowGroupPlotClicked(); break;
-        case 9: _t->ButHideGroupPlotClicked(); break;
-        case 10: _t->ButShowWordStatistic(); break;
-        case 11: _t->ButCreateErrorsTrainingClicked(); break;
-        case 12: _t->ButLostClicked(); break;
-        case 13: _t->LdFieldTextChanged((*reinterpret_cast< QString(*)>(_a[1]))); break;
-        case 14: _t->BoxModeNamesCurrentIndexChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 15: _t->BoxTrainingCurrentIndexChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 16: _t->BoxFromYearCurrentIndexChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 17: _t->BoxFromMonthCurrentIndexChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 18: _t->BoxToYearCurrentIndexChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 19: _t->BoxToMonthCurrentIndexChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 20: _t->PlotMousePress((*reinterpret_cast< QMouseEvent*(*)>(_a[1]))); break;
-        case 21: _t->PlotMouseMove((*reinterpret_cast< QMouseEvent*(*)>(_a[1]))); break;
-        case 22: _t->CHBoxSpeedChecked(); break;
-        case 23: _t->CHBoxMistakeChecked(); break;
-        case 24: _t->CHBoxAmountTextChecked(); break;
-        case 25: _t->CHBoxLetterErrorsChecked(); break;
-        case 26: _t->CHBoxSyllableErrorsChecked(); break;
-        case 27: _t->CHBoxWordErrorsChecked(); break;
-        case 28: _t->CHBoxWordsSpeedChecked(); break;
-        case 29: _t->IsWin(); break;
-        case 30: _t->OnTime(); break;
-        case 31: _t->OnPauseTime(); break;
-        case 32: _t->OnUpdateData(); break;
+        case 6: _t->ButAddNewBookClicked(); break;
+        case 7: _t->ButStartClicked(); break;
+        case 8: _t->ButLoadTrainingClicked(); break;
+        case 9: _t->ButShowGroupPlotClicked(); break;
+        case 10: _t->ButHideGroupPlotClicked(); break;
+        case 11: _t->ButShowWordStatistic(); break;
+        case 12: _t->ButCreateErrorsTrainingClicked(); break;
+        case 13: _t->ButLostClicked(); break;
+        case 14: _t->LdFieldTextChanged((*reinterpret_cast< QString(*)>(_a[1]))); break;
+        case 15: _t->BoxModeNamesCurrentIndexChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 16: _t->BoxTrainingCurrentIndexChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 17: _t->BoxFromYearCurrentIndexChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 18: _t->BoxFromMonthCurrentIndexChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 19: _t->BoxToYearCurrentIndexChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 20: _t->BoxToMonthCurrentIndexChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 21: _t->PlotMousePress((*reinterpret_cast< QMouseEvent*(*)>(_a[1]))); break;
+        case 22: _t->PlotMouseMove((*reinterpret_cast< QMouseEvent*(*)>(_a[1]))); break;
+        case 23: _t->CHBoxSpeedChecked(); break;
+        case 24: _t->CHBoxMistakeChecked(); break;
+        case 25: _t->CHBoxAmountTextChecked(); break;
+        case 26: _t->CHBoxLetterErrorsChecked(); break;
+        case 27: _t->CHBoxSyllableErrorsChecked(); break;
+        case 28: _t->CHBoxWordErrorsChecked(); break;
+        case 29: _t->CHBoxWordsSpeedChecked(); break;
+        case 30: _t->IsWin(); break;
+        case 31: _t->OnTime(); break;
+        case 32: _t->OnPauseTime(); break;
+        case 33: _t->OnUpdateData(); break;
         default: ;
         }
     }
@@ -258,13 +262,13 @@ int PRINT_WINDOW_LOGIC::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 33)
+        if (_id < 34)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 33;
+        _id -= 34;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 33)
+        if (_id < 34)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 33;
+        _id -= 34;
     }
     return _id;
 }

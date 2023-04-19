@@ -332,6 +332,8 @@ void WINDOWS::SetPrintWindow(){
     QVBoxLayout *v_right_l = new QVBoxLayout;
     h_main_print_l->addLayout(v_right_l);
 
+    QPushButton *but_add_new_book = new QPushButton("Добавить новую книгу");
+    v_right_l->addWidget(but_add_new_book);
     QPushButton *but_lost = new QPushButton("Сбился");
     v_right_l->addWidget(but_lost);
     QPushButton *but_voice_settings = new QPushButton("Настройка озвучки");
@@ -354,6 +356,15 @@ void WINDOWS::SetPrintWindow(){
     ld_text_amount->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     h_text_amount_l->addWidget(lab_text_amount,0,Qt::AlignLeft);
     h_text_amount_l->addWidget(ld_text_amount,0,Qt::AlignRight);
+
+    QHBoxLayout *h_current_text_l= new QHBoxLayout();
+    v_info_l->addLayout(h_current_text_l);
+    QLabel *lab_current_text = new QLabel("Текущий текст:");
+    QLineEdit *ld_current_text = new QLineEdit;
+    lab_current_text->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
+    ld_current_text->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    h_current_text_l->addWidget(lab_current_text,0,Qt::AlignLeft);
+    h_current_text_l->addWidget(ld_current_text,0,Qt::AlignRight);
 
     QHBoxLayout *h_record_l = new QHBoxLayout();
     v_info_l->addLayout(h_record_l);
@@ -400,9 +411,10 @@ void WINDOWS::SetPrintWindow(){
     my_style->SetLdInfoStyle(ld_mistakes);
     my_style->SetLdInfoStyle(ld_all_time);
 
-    print_window_logic = new PRINT_WINDOW_LOGIC(but_lost,but_voice_settings,but_start, but_load_training,box_mode_name,box_training_name, ld_game_pole, ld_current_mistakes,
+    print_window_logic = new PRINT_WINDOW_LOGIC(but_add_new_book,but_lost,but_voice_settings,but_start, but_load_training,box_mode_name,box_training_name,
+    ld_current_text, ld_game_pole, ld_current_mistakes,
     ld_current_speed, ld_text_amount, ld_record, ld_average_speed,  ld_mistakes, ld_all_time, ld_current_min, ld_current_sec, text_mistakes_browser,
-    text_browser, lab_current_mistakes, but_create_training, but_add_training, but_show_plot, plot, but_hide_group_plot, box_from_year,
+    text_browser,lab_current_text, lab_current_mistakes, but_create_training, but_add_training, but_show_plot, plot, but_hide_group_plot, box_from_year,
     box_from_month, box_to_year, box_to_month, group_plot, ld_plot_value, group_game_pole,chbox_amount_text,
     chbox_speed, chbox_mistake, chbox_letter_errors, chbox_syllable_errors, chbox_word_errors, chbox_words_speed, but_show_word_statistic,
     group_report, but_create_errors_training); //здесь мы передаем объекты в класс осуществляющий взаимодействие с пользователем

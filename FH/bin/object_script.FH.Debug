@@ -1,3 +1,4 @@
+debug/book_mode.o
 debug/chat.o
 debug/db.o
 debug/main.o

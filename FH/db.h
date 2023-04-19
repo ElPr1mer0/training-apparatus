@@ -45,19 +45,22 @@ public:
     /////////////////////////////////////////////////////////////////////////////
     void LoadModeNames(QList<QString> &mode_names);
     void LoadTrainingNames(const QString &mode_name, QList<QString> &training_names);
-    void LoadTrainingStatistics(const QString &, const QString &,QString &);
-    void LoadTraining(const QString &,const QString &, QString &);
-    void LoadAdditionalStatistics(const QString &,const QString &, QString &, const QString &);
-    void LoadStatisticsPerTime(const QString &, const QString & , QList<CHART> &, const int & = 2019, const int & = 0, const int & = 0);
+    void LoadTrainingStatistics(const QString &mode_name, const QString &training_name,QString &statistics);
+    void LoadTraining(const QString &mode_name,const QString &training_name, QString &training);
+    void LoadAdditionalStatistics(const QString &mode_name,const QString &training_name, QString &statistics, const QString &statistics_type);
+    void LoadStatisticsPerTime(const QString &mode_name, const QString &training_name, QList<CHART> &statistics_per_time,
+                               const int &year = 2019, const int &month = 0, const int &day = 0);
 
-    void SendTrainingStatistics(const QString &, const QString &, const QString &);
-    void SendAdditionalStatistics(const QString &, const QString &, QString &, const QString &);
-    void SendAddedTraining(const QString &, const QString &);
-    void SendStatisticsPerTime(const QString &, const QString &, const int &, const int &,
-                               const int &, const int &, const int &, const float &);
+    void SendTrainingStatistics(const QString &mode_name, const QString &training_name, const QString &statistics);
+    void SendAdditionalStatistics(const QString &mode_name, const QString &training_name, QString &statistics, const QString &statistics_type);
+    void SendAddedTraining(const QString &mode_name, const QString &training_name);
+    void SendStatisticsPerTime(const QString &mode_name, const QString &training_name, const int &year, const int &month,
+                               const int &day, const int &speed, const int &amount, const float &mistakes);
 
-    bool CreateCustomTraining(const QString &,const QString &, const QString &);
+    bool CreateCustomTraining(const QString &mode_name,const QString &training_name, const QString &content);
+    bool CreateCustomBook(const QString &mode_name,const QString &training_name, const QList<QString> &content);
 
+    void LoadBookTraining(const QString &mode_name,const QString &training_name, QList<QString> &content);
     /////////////////////////////////////////////////////////////////////////////
     ////////////////PRINT_WINDOW(training_mode)//////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////

@@ -10,7 +10,7 @@ class CHART;
 
 class QDate;
 
-#define TOTAL_WORDS_PER_LEVEL 10
+#define TOTAL_WORDS_PER_LEVEL 50
 
 class MODE{
     //Q_OBJECT
@@ -72,8 +72,6 @@ public:
     QString GetErrorsTraining(const QMap<QString, T> &map); //создание тренировки по частым ошибкам
     template <typename T>
     void SortBufPrintStatistics(const QMap<QString, T>&map, std::vector<QString>&keys, std::vector<float> &values); // сортировка по кол-ву ошибок
-
-
 };
 
 ////////////////////////////////////////////////////////////////////////

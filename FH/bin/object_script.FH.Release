@@ -1,3 +1,4 @@
+release/book_mode.o
 release/chat.o
 release/db.o
 release/main.o

@@ -19,15 +19,12 @@ bool TRAINING_MODE::AddTraining(){
     QString content = "";
     for(auto it = word_training_list.begin();it!=word_training_list.end();++it) content += *it+'\n';
 
-    if(db->CreateCustomTraining("training", custom_training_name, content)){ //добавляем новый режим в таблицу mode
-        db->SendTrainingStatistics("training", custom_training_name,"0 0 0 0 0 0 0 ");//создаем статистику по режиму в таблицу statistics
+    if(db->CreateCustomTraining(TRAINING, custom_training_name, content)){ //добавляем новый режим в таблицу mode
+        db->SendTrainingStatistics(TRAINING, custom_training_name,"0 0 0 0 0 0 0 ");//создаем статистику по режиму в таблицу statistics
         content = "";
         training_names.append(custom_training_name);//добавляем наше имя тренировки в список
 
-        QString new_training_name = "";
-        for(auto it : training_names) new_training_name += it +"\n"; //создаем строку наших имен для отправки в бд
-
-        db->SendAddedTraining("training",new_training_name);//добавляем название новой тренировки в бд
+        db->SendAddedTraining(TRAINING,custom_training_name);//добавляем название новой тренировки в бд
         return true;
     }
     return false;   //если что-то пошло не так при обращении к бд, то возвращаем false

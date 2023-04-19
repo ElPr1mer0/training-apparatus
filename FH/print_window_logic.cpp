@@ -2,6 +2,7 @@
 #include "mode.h"
 #include "training_mode.h"
 #include "voice_acting_mode.h"
+#include "book_mode.h"
 #include "qcustomplot.h"
 #include "resourse.h"
 #include "chart.h"
@@ -16,16 +17,17 @@
 /// получает созданные виджеты и связывает их для последующей обработ-
 /// ки взаимодействий с ними на форме, соединяет слоты со сигналами
 /// этих объектов и подгружает стартовые данные по тренировке
-PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_lost, QPushButton *but_voice_settings,QPushButton *but_start, QPushButton *but_load_training,QComboBox *box_mode_name, QComboBox *box_training_name,
- QLineEdit *ld_game_pole, QLineEdit *ld_current_mistakes, QLineEdit *ld_current_speed, QLineEdit *ld_text_amount,
+PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_add_new_book, QPushButton *but_lost, QPushButton *but_voice_settings,QPushButton *but_start, QPushButton *but_load_training,QComboBox *box_mode_name, QComboBox *box_training_name,
+ QLineEdit *ld_current_text, QLineEdit *ld_game_pole, QLineEdit *ld_current_mistakes, QLineEdit *ld_current_speed, QLineEdit *ld_text_amount,
  QLineEdit *ld_record, QLineEdit *ld_average_speed, QLineEdit *ld_mistakes, QLineEdit *ld_all_time,
- QLineEdit *ld_current_min, QLineEdit *ld_current_sec,QTextBrowser *text_mistakes_browser, QTextBrowser *text_browser, QLabel* lab_current_mistakes,
+ QLineEdit *ld_current_min, QLineEdit *ld_current_sec,QTextBrowser *text_mistakes_browser, QTextBrowser *text_browser,QLabel *lab_current_text, QLabel* lab_current_mistakes,
  QPushButton *but_create_training, QPushButton *but_add_training,QPushButton *but_show_group_plot, QCustomPlot *plot,
  QPushButton *but_hide_group_plot, QComboBox *box_from_year, QComboBox *box_from_month, QComboBox *box_to_year,
  QComboBox *box_to_month, QGroupBox *group_plot, QLineEdit *ld_plot_value, QGroupBox *group_game_pole,
  QCheckBox *chbox_amount_text, QCheckBox *chbox_speed, QCheckBox *chbox_mistake, QCheckBox *chbox_letter_errors,
  QCheckBox *chbox_syllable_errors, QCheckBox *chbox_word_errors , QCheckBox *chbox_words_speed,
  QPushButton *but_show_word_statistic, QGroupBox *group_report, QPushButton *but_create_errors_training){
+    this->but_add_new_book = but_add_new_book;
     this->but_lost = but_lost;
     this->but_voice_settings = but_voice_settings;
     this->but_start = but_start;
@@ -44,6 +46,7 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_lost, QPushButton *but_v
     this->box_to_year = box_to_year;
     this->box_to_month = box_to_month;
 
+    this->ld_current_text = ld_current_text;
     this->ld_game_pole = ld_game_pole;
     this->ld_current_mistakes = ld_current_mistakes;
     this->ld_current_speed = ld_current_speed;
@@ -59,6 +62,7 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_lost, QPushButton *but_v
     this->text_browser = text_browser;
     this->text_mistakes_browser = text_mistakes_browser;
 
+    this->lab_current_text = lab_current_text;
     this->lab_current_mistakes = lab_current_mistakes;
 
     this->plot = plot;
@@ -89,6 +93,7 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_lost, QPushButton *but_v
 
     sounds = new SOUNDS;
     mode = new MODE;
+    book_mode = new BOOK_MODE(mode->db);
     training_mode = new TRAINING_MODE(mode->db);
     voice_acting_mode = new VOICE_ACTING_MODE();
 
@@ -111,6 +116,8 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_lost, QPushButton *but_v
     connect(this->box_to_month,SIGNAL(currentIndexChanged(int)),this,SLOT(BoxToMonthCurrentIndexChanged(int)));
 
 
+
+    connect(this->but_add_new_book, SIGNAL(clicked()),this,SLOT(ButAddNewBookClicked()));
     connect(this->but_lost, SIGNAL(clicked()),this,SLOT(ButLostClicked()));
     connect(this->but_load_training, SIGNAL(clicked()),this,SLOT(ButLoadTrainingClicked()));
     connect(this->but_start, SIGNAL(clicked()),this, SLOT(ButStartClicked()));
@@ -132,7 +139,8 @@ PRINT_WINDOW_LOGIC::PRINT_WINDOW_LOGIC(QPushButton *but_lost, QPushButton *but_v
     connect(this->chbox_word_errors, SIGNAL(clicked()),this, SLOT(CHBoxWordErrorsChecked()));
     connect(this->chbox_words_speed, SIGNAL(clicked()),this, SLOT(CHBoxWordsSpeedChecked()));
 
-    mode->GetStatistics(this->box_mode_name->currentText(),this->box_training_name->currentText());//загружаем данные для режима в переменные
+    if(this->box_mode_name->currentText() != BOOK)mode->GetStatistics(this->box_mode_name->currentText(),this->box_training_name->currentText());//загружаем данные для режима в переменные
+    else this->book_mode->GetBookStatistics(box_training_name->currentText());
     OnUpdateData(); //добавляем на форму
 
     mode->ClearStatisticsContainers();
@@ -419,6 +427,25 @@ void PRINT_WINDOW_LOGIC::ButDeleteWordClicked(){
 
 
 ///////////////////////////////////////////////////////////////////////
+///////////////PRINT_WINDOW_LOGIC::ButAddNewBookClicked////////////////
+///////////////////////////////////////////////////////////////////////
+/// Вызывает функцию создания из книги текста подходящего для создания
+/// тренировок по книге.
+void PRINT_WINDOW_LOGIC::ButAddNewBookClicked(){
+    text_browser->clear(); //очищаем основной экран
+    QString file_path = QFileDialog::getOpenFileName(this,"Выберите файл для создания книги:",QDir::currentPath(),"TXT Files (*.txt);"); //загружаем файл для создания книги
+
+    book_mode->CreateTextFileFromBook(file_path); //обрабатываем его
+    text_browser->insertPlainText(book_mode->CreateTextFileFromBook(file_path)); //результат работы функции выводим в обзорщик
+    box_training_name->addItem(book_mode->book_name);  // подгружаем названия нашей книги в comboBoxSelectBook
+}
+///////////////////////////////////////////////////////////////////////
+///////////////PRINT_WINDOW_LOGIC::ButAddNewBookClicked////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+
+///////////////////////////////////////////////////////////////////////
 //////////////PRINT_WINDOW_LOGIC::GetCreateTrainingComponents//////////
 ///////////////////////////////////////////////////////////////////////
 /// получает созданные виджеты для CreateTrainingWindow и связывает
@@ -549,21 +576,27 @@ void PRINT_WINDOW_LOGIC::BoxModeNamesCurrentIndexChanged(int){
     box_training_name->clear();//очищаем box
     but_start->setEnabled(true); // это если кнопка была заблочена, когда книга пройдена
 
-    if(box_mode_name->currentText() == TEXT_ACTING){
+    if(box_mode_name->currentText() == BOOK){
+         mode->GetTrainingNames(BOOK);
+         book_mode->GetBookStatistics(box_training_name->currentText());
+
+    }else  if(box_mode_name->currentText() == TEXT_ACTING){
         but_voice_settings->setVisible(true);
         but_lost->setVisible(true);
+
+
         mode->GetTrainingNames(TRAINING);
+        mode->GetStatistics(box_mode_name->currentText(),box_training_name->currentText());//получаем статистику по тренировке
     }else{
         but_voice_settings->setVisible(false);
         but_lost->setVisible(false);
 
-        mode->GetTrainingNames(this->box_mode_name->currentText()); //получаем имена тренировок по режиму
+        mode->GetTrainingNames(box_mode_name->currentText());
+        mode->GetStatistics(box_mode_name->currentText(),box_training_name->currentText());//получаем статистику по тренировке
     }
 
     box_training_name->addItems(mode->training_names); //добавляем имена в box
-    mode->GetStatistics(box_mode_name->currentText(),box_training_name->currentText());//получаем статистику по тренировке
     mode->UpdateStatisticsContainers(box_mode_name->currentText(),box_training_name->currentText());
-
     mode->ClearStatisticsContainers(); //очистках контейнеров с ошибками для добавления ошибок по загружаемой тренировке
 
     OnUpdateData();//обновление данных на поле
@@ -641,6 +674,12 @@ void PRINT_WINDOW_LOGIC::ButLoadTrainingClicked(){
             text_browser->setVisible(true);
             text_mistakes_browser->setVisible(false);
         }
+    }else if(box_mode_name->currentText() == BOOK){
+        training_text = book_mode->GetBookTraining(box_training_name->currentText());
+        if(training_text == "Нет слов в данной тренировке!") but_start->setEnabled(false);
+
+        text_browser->setVisible(true);
+        text_mistakes_browser->setVisible(false);
     }
 
     text_browser->insertPlainText(training_text);
@@ -839,7 +878,13 @@ void PRINT_WINDOW_LOGIC::ButLostClicked(){
 /// обрабатывает событие выбора другой тренировки в комбо боксе и
 /// подгружает информацию об ошибках и статистике
 void PRINT_WINDOW_LOGIC::BoxTrainingCurrentIndexChanged(int){
-    mode->GetStatistics(box_mode_name->currentText(),box_training_name->currentText());
+    if(box_mode_name->currentText() == BOOK){
+        book_mode->GetBookStatistics(box_training_name->currentText());
+    }
+    else{
+        mode->GetStatistics(box_mode_name->currentText(),box_training_name->currentText());
+
+    }
     but_start->setEnabled(true); // это если кнопка была заблочена, когда книга пройдена
     OnUpdateData();
 
@@ -1157,12 +1202,26 @@ void PRINT_WINDOW_LOGIC::OnPauseTime(){
 /// функция обновляет данные после набора текста, или при загрузке
 /// приложения в информационных полях.
 void PRINT_WINDOW_LOGIC::OnUpdateData(){
-    ld_text_amount->setText(QString::number(mode->text_amount)); //здесь заполняем данные для отображения на поле
-    ld_record->setText(QString::number(floor(mode->record)));
-    ld_average_speed->setText(QString::number(floor(mode->average_speed))+" симв/м");
-    ld_mistakes->setText(QString::number(mode->mistakes)+"%");
-    ld_all_time->setText(QString::number(floor(mode->play_time_hours)) + " ч; " +
-                         QString::number(floor(mode->play_time_min)) + " м; "); // floor убирает остаток от числа
+    if(box_mode_name->currentText() == BOOK){
+        ld_text_amount->setText(QString::number(book_mode->text_amount)); //здесь заполняем данные для отображения на поле
+        ld_current_text->setVisible(true);
+        lab_current_text->setVisible(true);
+        ld_current_text->setText(QString::number(book_mode->current_text));
+        ld_record->setText(QString::number(floor(book_mode->record)));
+        ld_average_speed->setText(QString::number(floor(book_mode->average_speed))+" симв/м");
+        ld_mistakes->setText(QString::number(book_mode->mistakes)+"%");
+        ld_all_time->setText(QString::number(floor(book_mode->play_time_hours)) + " ч; " +
+                             QString::number(floor(book_mode->play_time_min)) + " м; "); // floor убирает остаток от числа
+    }else{
+        ld_current_text->setVisible(false);
+        lab_current_text->setVisible(false);
+        ld_text_amount->setText(QString::number(mode->text_amount)); //здесь заполняем данные для отображения на поле
+        ld_record->setText(QString::number(floor(mode->record)));
+        ld_average_speed->setText(QString::number(floor(mode->average_speed))+" симв/м");
+        ld_mistakes->setText(QString::number(mode->mistakes)+"%");
+        ld_all_time->setText(QString::number(floor(mode->play_time_hours)) + " ч; " +
+                             QString::number(floor(mode->play_time_min)) + " м; "); // floor убирает остаток от числа
+    }
 }
 ////////////////////////////////////////////////////////////////////////
 /////////////////PRINT_WINDOW_LOGIC::OnUpdateData///////////////////////
@@ -1192,34 +1251,64 @@ void PRINT_WINDOW_LOGIC::IsWin(){
 
 
     if(!errors_mode){ // если не запущен режим по работе над ошибками, то данные надо сохранить и обновить
+        if(box_mode_name->currentText() == BOOK){ // для book_mode
 
-        if(average_current_speed>mode->record){ // если новый рекорд
-            sounds->Play(sounds->print_record);
-            mode->record = average_current_speed;
-            text_browser->insertPlainText("         New record!!!           ");
+            if(average_current_speed>book_mode->record){ // если новый рекорд
+                sounds->Play(sounds->print_record);
+                book_mode->record = average_current_speed;
+                text_browser->insertPlainText("         Поздравляю! У вас новый рекорд!           ");
+            }
+
+            book_mode->average_speed = (average_current_speed + book_mode->current_text*book_mode->average_speed) / (book_mode->current_text+1); // средняя скорость за все время
+            book_mode->mistakes = round(100*((round(100*ld_current_mistakes->text().toFloat()*100/(edit_text.length()-1))/100) +
+                                  book_mode->current_text*book_mode->mistakes)/(book_mode->current_text+1))/100;//среднее кол-во ошибок за все время
+
+            ++book_mode->current_text; //кол-во пройденных текстов стало больше на 1
+
+            book_mode->play_time_min += min; //сохраняем время
+            book_mode->play_time_sec += sec;
+            if(book_mode->play_time_sec >= 60){
+                book_mode->play_time_min++;
+                book_mode->play_time_sec-=60;
+             }
+            if( book_mode->play_time_min >= 60){
+                book_mode->play_time_min -=60;
+                book_mode->play_time_hours++;
+            }
+
+            book_mode->UpdateBookStatistics(box_training_name->currentText()); // загружаем инфу в бд
+
+        }else{ //для других модов
+
+            if(average_current_speed>mode->record){ // если новый рекорд
+                sounds->Play(sounds->print_record);
+                mode->record = average_current_speed;
+                text_browser->insertPlainText("         New record!!!           ");
+            }
+
+            mode->average_speed = (average_current_speed + mode->text_amount*mode->average_speed) / (mode->text_amount+1); // средняя скорость за все время
+            mode->mistakes = round(100*((round(100*ld_current_mistakes->text().toFloat()*100/(edit_text.length()-1))/100) +
+                                  mode->text_amount*mode->mistakes)/(mode->text_amount+1))/100;//среднее кол-во ошибок за все время
+
+            ++mode->text_amount; //кол-во пройденных текстов стало больше на 1
+
+            mode->play_time_min += min; //сохраняем время
+            mode->play_time_sec += sec;
+            if(mode->play_time_sec >= 60){
+                mode->play_time_min++;
+                mode->play_time_sec-=60;
+             }
+            if( mode->play_time_min >= 60){
+                mode->play_time_min -=60;
+                mode->play_time_hours++;
+            }
+
+            mode->UpdateStatistics(box_mode_name->currentText(),box_training_name->currentText()); // загружаем инфу в бд
         }
-
-        mode->average_speed = (average_current_speed + mode->text_amount*mode->average_speed) / (mode->text_amount+1); // средняя скорость за все время
-        mode->mistakes = round(100*((round(100*ld_current_mistakes->text().toFloat()*100/(edit_text.length()-1))/100) +
-                              mode->text_amount*mode->mistakes)/(mode->text_amount+1))/100;//среднее кол-во ошибок за все время
-
-        ++mode->text_amount; //кол-во пройденных текстов стало больше на 1
-
-        mode->play_time_min += min; //сохраняем время
-        mode->play_time_sec += sec;
-        if(mode->play_time_sec >= 60){
-            mode->play_time_min++;
-            mode->play_time_sec-=60;
-         }
-        if( mode->play_time_min >= 60){
-            mode->play_time_min -=60;
-            mode->play_time_hours++;
-        }
-
-        OnUpdateData();
-        mode->UpdateStatistics(box_mode_name->currentText(),box_training_name->currentText()); // загружаем инфу в бд
+        // для всех режимов общее
         mode->UpdateAdditionalStatistics(box_mode_name->currentText(),box_training_name->currentText());//мы отправляем статистику ошибочных букв в бд
         mode->UpdateStatisticsPerTime(box_mode_name->currentText(),box_training_name->currentText(),current_mistakes,average_current_speed);
+        OnUpdateData();
     }
 
     errors_mode = false;
